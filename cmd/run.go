@@ -5,7 +5,7 @@ import (
 	"os"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
-	"github.com/ch0ppy35/sherlock/internal/testing"
+	"github.com/ch0ppy35/sherlock/internal/dnstest"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +33,7 @@ Example usage:
 			os.Exit(1)
 		}
 		client := new(dns.Client)
-		err = testing.RunAllTestsInConfig(config, client)
+		err = dnstest.RunAllTestsInConfig(config, client)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error running tests: %v\n", err)
 			os.Exit(1)
