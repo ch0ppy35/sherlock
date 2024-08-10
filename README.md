@@ -6,7 +6,9 @@ A CLI tool for testing DNS records.
 
 Sherlock is a command-line tool designed to perform DNS record tests based on a specified configuration file. It allows you to run various types of DNS checks, such as verifying A, AAAA, CNAME, MX, TXT, and NS records.
 
-This tool supports a configuration file in YAML format where you can define the expected DNS records for different hosts. The `run` command executes all tests defined in the configuration and provides a summary of any discrepancies found.
+This tool is generally intended to be used within a container, making it ideal for integration into CI/CD pipelines or scheduled tasks like cron jobs running in Kubernetes. Binaries are also provided in the GitHub release, or you can build the binary locally using the `make` command.
+
+Sherlock supports a configuration file in YAML format where you can define the expected DNS records for different hosts. The `run` command executes all tests defined in the configuration and provides a summary of any discrepancies found.
 
 ## Configuration
 
@@ -43,5 +45,5 @@ Replace `path/to/config.yaml` with the actual path to your configuration file.
 Alternatively, you can run Sherlock inside a Docker container. First, ensure you have a Docker image built or available. Then, execute:
 
 ```bash
-docker run --rm -it -v "$(pwd)/config:/app/config" ghcr.io/ch0ppy35/sherlock:v0.2.0 run --config /app/config/config.yaml
+docker run --rm -it -v "$(pwd)/config:/app/config" ghcr.io/ch0ppy35/sherlock:v0.2.1 run --config /app/config/config.yaml
 ```
