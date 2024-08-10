@@ -19,7 +19,7 @@ func TestLoadConfig(t *testing.T) {
 			configFile: "testdata/valid_config.yaml",
 			expected: Config{
 				DNSServer: "8.8.8.8",
-				Tests: []TestConfig{
+				Tests: []DNSTestConfig{
 					{
 						ExpectedValues: []string{"1.1.1.1"},
 						Host:           "example.com",
@@ -49,7 +49,7 @@ func TestLoadConfig(t *testing.T) {
 			configFile: "testdata/missing_dns_server.yaml",
 			expected: Config{
 				DNSServer: "1.1.1.1", // Default DNS Server
-				Tests: []TestConfig{
+				Tests: []DNSTestConfig{
 					{
 						ExpectedValues: []string{"1.1.1.1"},
 						Host:           "example.com",

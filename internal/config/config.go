@@ -7,11 +7,11 @@ import (
 )
 
 type Config struct {
-	DNSServer string       `yaml:"dnsServer"`
-	Tests     []TestConfig `yaml:"tests"`
+	DNSServer string          `yaml:"dnsServer"`
+	Tests     []DNSTestConfig `yaml:"tests"`
 }
 
-type TestConfig struct {
+type DNSTestConfig struct {
 	ExpectedValues []string `yaml:"expectedValues"`
 	Host           string   `yaml:"host"`
 	TestType       string   `yaml:"testType"`

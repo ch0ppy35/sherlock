@@ -15,7 +15,7 @@ func RunAllTestsInConfig(config cfg.Config, client dns.TinyDNSClient) error {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
-	hostTests := make(map[string][]cfg.TestConfig)
+	hostTests := make(map[string][]cfg.DNSTestConfig)
 	results := make(map[string]*dns.DNSRecords)
 	errors := make(map[string]error)
 
@@ -50,7 +50,7 @@ func queryDNSForHost(host string, server string, client dns.TinyDNSClient, resul
 	mu.Unlock()
 }
 
-func runTestsForHost(host string, tests []cfg.TestConfig, results map[string]*dns.DNSRecords, errors map[string]error, allErrors *[]error) {
+func runTestsForHost(host string, tests []cfg.DNSTestConfig, results map[string]*dns.DNSRecords, errors map[string]error, allErrors *[]error) {
 	fmt.Printf("####################################################\n")
 	fmt.Printf("Running tests for: %s...\n", host)
 

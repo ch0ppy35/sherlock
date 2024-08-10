@@ -27,7 +27,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 			name: "Valid configuration",
 			config: cfg.Config{
 				DNSServer: "8.8.8.8",
-				Tests: []cfg.TestConfig{
+				Tests: []cfg.DNSTestConfig{
 					{
 						Host:           "example.com",
 						TestType:       "a",
@@ -48,7 +48,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 			name: "Configuration with missing records",
 			config: cfg.Config{
 				DNSServer: "8.8.8.8",
-				Tests: []cfg.TestConfig{
+				Tests: []cfg.DNSTestConfig{
 					{
 						Host:           "example.com",
 						TestType:       "a",
@@ -69,7 +69,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 			name: "Configuration with query error",
 			config: cfg.Config{
 				DNSServer: "8.8.8.8",
-				Tests: []cfg.TestConfig{
+				Tests: []cfg.DNSTestConfig{
 					{
 						Host:           "example.com",
 						TestType:       "a",
@@ -84,7 +84,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 			name: "Empty configuration",
 			config: cfg.Config{
 				DNSServer: "8.8.8.8",
-				Tests:     []cfg.TestConfig{},
+				Tests:     []cfg.DNSTestConfig{},
 			},
 			expectedError: "",
 		},
@@ -206,7 +206,7 @@ func Test_runTestsForHost(t *testing.T) {
 	tests := []struct {
 		name           string
 		host           string
-		testConfigs    []cfg.TestConfig
+		DNSTestConfigs []cfg.DNSTestConfig
 		results        map[string]*dns.DNSRecords
 		errors         map[string]error
 		expectedErrors []error
@@ -214,7 +214,7 @@ func Test_runTestsForHost(t *testing.T) {
 		{
 			name: "Valid AAAA record match",
 			host: "example.com",
-			testConfigs: []cfg.TestConfig{
+			DNSTestConfigs: []cfg.DNSTestConfig{
 				{
 					TestType:       "a",
 					ExpectedValues: []string{"10.0.0.1"},
@@ -229,7 +229,7 @@ func Test_runTestsForHost(t *testing.T) {
 		{
 			name: "Valid AAAA record match",
 			host: "example.com",
-			testConfigs: []cfg.TestConfig{
+			DNSTestConfigs: []cfg.DNSTestConfig{
 				{
 					TestType:       "aaaa",
 					ExpectedValues: []string{"2001:0db8:85a3:0000:0000:8a2e:0370:7334"},
@@ -246,7 +246,7 @@ func Test_runTestsForHost(t *testing.T) {
 		{
 			name: "Valid CNAME record match",
 			host: "example.com",
-			testConfigs: []cfg.TestConfig{
+			DNSTestConfigs: []cfg.DNSTestConfig{
 				{
 					TestType:       "cname",
 					ExpectedValues: []string{"cname.example.com."},
@@ -263,7 +263,7 @@ func Test_runTestsForHost(t *testing.T) {
 		{
 			name: "Valid MX record match",
 			host: "example.com",
-			testConfigs: []cfg.TestConfig{
+			DNSTestConfigs: []cfg.DNSTestConfig{
 				{
 					TestType:       "mx",
 					ExpectedValues: []string{"mail.example.com. 10\n"},
@@ -282,7 +282,7 @@ func Test_runTestsForHost(t *testing.T) {
 		{
 			name: "Valid TXT record match",
 			host: "example.com",
-			testConfigs: []cfg.TestConfig{
+			DNSTestConfigs: []cfg.DNSTestConfig{
 				{
 					TestType:       "txt",
 					ExpectedValues: []string{"v=spf1 include:_spf.example.com ~all"},
@@ -299,7 +299,7 @@ func Test_runTestsForHost(t *testing.T) {
 		{
 			name: "Valid NS record match",
 			host: "example.com",
-			testConfigs: []cfg.TestConfig{
+			DNSTestConfigs: []cfg.DNSTestConfig{
 				{
 					TestType:       "ns",
 					ExpectedValues: []string{"ns1.example.com."},
@@ -316,7 +316,7 @@ func Test_runTestsForHost(t *testing.T) {
 		{
 			name: "Records don't match configuration",
 			host: "example.com",
-			testConfigs: []cfg.TestConfig{
+			DNSTestConfigs: []cfg.DNSTestConfig{
 				{
 					TestType:       "a",
 					ExpectedValues: []string{"10.0.0.2"},
@@ -337,7 +337,7 @@ func Test_runTestsForHost(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			allErrors := []error{}
-			runTestsForHost(tt.host, tt.testConfigs, tt.results, tt.errors, &allErrors)
+			runTestsForHost(tt.host, tt.DNSTestConfigs, tt.results, tt.errors, &allErrors)
 
 			if len(allErrors) != len(tt.expectedErrors) {
 				t.Errorf("runTestsForHost() allErrors = %v, expectedErrors %v", allErrors, tt.expectedErrors)
