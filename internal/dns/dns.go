@@ -25,6 +25,14 @@ type TinyDNSClient interface {
 	Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error)
 }
 
+type MockTinyDNSClient struct {
+	MockExchange func(*dns.Msg, string) (*dns.Msg, time.Duration, error)
+}
+
+func (m *MockTinyDNSClient) Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
+	return m.MockExchange(msg, server)
+}
+
 // compareRecords compares the expected and actual DNS records and returns an error if they don't match.
 func CompareRecords(expected []string, actual []string) error {
 	expectedMap := make(map[string]struct{}, len(expected))

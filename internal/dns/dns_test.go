@@ -10,14 +10,6 @@ import (
 	"github.com/miekg/dns"
 )
 
-type MockTinyDNSClient struct {
-	mockExchange func(*dns.Msg, string) (*dns.Msg, time.Duration, error)
-}
-
-func (m *MockTinyDNSClient) Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
-	return m.mockExchange(msg, server)
-}
-
 func TestCompareRecords(t *testing.T) {
 	type args struct {
 		expected []string
@@ -150,7 +142,7 @@ func TestQueryDNSRecord(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client := &MockTinyDNSClient{
-				mockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
+				MockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
 					if tt.mockError != nil {
 						return nil, 0, tt.mockError
 					}
@@ -289,7 +281,7 @@ func TestQueryDNS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client := &MockTinyDNSClient{
-				mockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
+				MockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
 					if tt.mockError != nil {
 						return nil, 0, tt.mockError
 					}
