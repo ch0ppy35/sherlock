@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+changelog:
+  use: github
+  format: "{{.SHA}}: {{.Message}} (@{{.AuthorUsername}})"
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+dockers:
+  - image_templates:
+      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-amd64"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+    dockerfile: "Dockerfile.release"
+    goarch: amd64
+    goos: linux
+  - image_templates:
+      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-arm64"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+    dockerfile: "Dockerfile.release"
+    goarch: arm64
+    goos: linux
+
+docker_manifests:
+  - name_template: "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-amd64"
+      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-arm64"

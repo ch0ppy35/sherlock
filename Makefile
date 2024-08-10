@@ -1,6 +1,6 @@
 .PHONY : build
 build:
-	go build -o bin/dnsTest .
+	go build -o bin/sherlock .
 
 .PHONY: test
 test:

@@ -2,5 +2,5 @@
   "yaml.schemas": {
     "https://json.schemastore.org/yamllint.json": ["config/config*.yaml"]
   },
-  "cSpell.words": ["miekg", "qtype"]
+  "cSpell.words": ["buildx", "goreleaser", "miekg", "qtype", "stretchr"]
 }

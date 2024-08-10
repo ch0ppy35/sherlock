@@ -1,0 +1,4 @@
+tests:
+  - expectedValues: ["1.1.1.1"]
+    host: "example.com"
+    testType: "A"

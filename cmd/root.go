@@ -8,9 +8,9 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "dnsTest",
+	Use:   "sherlock",
 	Short: "A CLI tool for testing DNS records",
-	Long: `dnsTest is a command-line tool designed to perform DNS record tests
+	Long: `sherlock is a command-line tool designed to perform DNS record tests
 based on a specified configuration file. It allows you to run various types
 of DNS checks, such as verifying A, AAAA, CNAME, MX, TXT, and NS records.
 
@@ -20,7 +20,7 @@ tests defined in the configuration and provides a summary of any discrepancies
 found.
 
 Usage examples:
-  dnsTest run --config path/to/config.yaml
+  sherlock run --config path/to/config.yaml
 
 For more information on individual commands, use the --help flag with the
 command name.`,
@@ -43,7 +43,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.dnsTest.yaml)")
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sherlock.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

@@ -2,11 +2,11 @@ package dns
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/miekg/dns"
 )
 
-// DNSRecords holds various types of DNS records.
 type DNSRecords struct {
 	ARecords     []string
 	AAAARecords  []string
@@ -16,10 +16,13 @@ type DNSRecords struct {
 	NSRecords    []string
 }
 
-// MXRecord represents an MX (Mail Exchange) record.
 type MXRecord struct {
 	Host string
 	Pref uint16
+}
+
+type TinyDNSClient interface {
+	Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error)
 }
 
 // compareRecords compares the expected and actual DNS records and returns an error if they don't match.
@@ -82,18 +85,13 @@ func CompareRecords(expected []string, actual []string) error {
 	if len(unexpectedRecords) > 0 || len(missingRecords) > 0 {
 		return fmt.Errorf("mismatched records found")
 	}
-
-	fmt.Printf("GOOD — All records match the configuration\n")
 	return nil
 }
 
 // QueryDNS fetches DNS records of various types for a given domain.
-func QueryDNS(domain string, dnsServer string) (*DNSRecords, error) {
+func QueryDNS(domain string, dnsServer string, client TinyDNSClient) (*DNSRecords, error) {
 	records := &DNSRecords{}
 	server := dnsServer + ":53"
-
-	// Set up the DNS client
-	client := new(dns.Client)
 
 	// Query and process each record type
 	queryTypes := []struct {
@@ -136,7 +134,7 @@ func QueryDNS(domain string, dnsServer string) (*DNSRecords, error) {
 	}
 
 	for _, qt := range queryTypes {
-		if err := queryDNSRecord(client, domain, server, qt.qtype, qt.setter); err != nil {
+		if err := QueryDNSRecord(client, domain, server, qt.qtype, qt.setter); err != nil {
 			return nil, fmt.Errorf("failed to query DNS records for type %d: %w", qt.qtype, err)
 		}
 	}
@@ -144,8 +142,8 @@ func QueryDNS(domain string, dnsServer string) (*DNSRecords, error) {
 	return records, nil
 }
 
-// queryDNSRecord queries a specific DNS record type and processes the results using a setter function.
-func queryDNSRecord(client *dns.Client, domain, server string, qtype uint16, setter func(dns.RR)) error {
+// QueryDNSRecord queries a specific DNS record type and processes the results using a setter function.
+func QueryDNSRecord(client TinyDNSClient, domain, server string, qtype uint16, setter func(dns.RR)) error {
 	msg := new(dns.Msg)
 	msg.SetQuestion(dns.Fqdn(domain), qtype)
 	resp, _, err := client.Exchange(msg, server)

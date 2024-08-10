@@ -1,4 +1,4 @@
-package testing
+package config
 
 import (
 	"fmt"
@@ -34,5 +34,9 @@ func LoadConfig(configFile string) (Config, error) {
 		return Config{}, fmt.Errorf("unable to decode into struct: %w", err)
 	}
 
+	if config.DNSServer == "" {
+		fmt.Println("DNS server not set, using Cloudflare as default")
+		config.DNSServer = "1.1.1.1"
+	}
 	return config, nil
 }

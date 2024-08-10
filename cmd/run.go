@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ch0ppy35/dnsTest/internal/testing"
+	cfg "github.com/ch0ppy35/sherlock/internal/config"
+	"github.com/ch0ppy35/sherlock/internal/testing"
+	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
 
@@ -23,14 +25,15 @@ the hosts to be tested. The tests will verify if the actual DNS records match th
 values and report any discrepancies after all tests are completed.
 
 Example usage:
-  dnsTest run --config path/to/config.yaml`,
+  sherlock run --config path/to/config.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, err := testing.LoadConfig(configFile)
+		config, err := cfg.LoadConfig(configFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
 			os.Exit(1)
 		}
-		err = testing.RunAllTestsInConfig(config)
+		client := new(dns.Client)
+		err = testing.RunAllTestsInConfig(config, client)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error running tests: %v\n", err)
 			os.Exit(1)
