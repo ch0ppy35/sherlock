@@ -33,7 +33,8 @@ Example usage:
 			os.Exit(1)
 		}
 		client := new(dns.Client)
-		err = dnstest.RunAllTestsInConfig(config, client)
+		executor := dnstest.NewDNSTestExecutor(config, client)
+		err = executor.RunAllTests()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error running tests: %v\n", err)
 			os.Exit(1)

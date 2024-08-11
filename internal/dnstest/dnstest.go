@@ -8,90 +8,145 @@ import (
 	"github.com/ch0ppy35/sherlock/internal/dns"
 )
 
-// RunAllTestsInConfig checks if the DNS records for the hosts in the configuration
-// match the expected values specified in the config and reports all errors at the end.
-func RunAllTestsInConfig(config cfg.Config, client dns.TinyDNSClient) error {
-	var allErrors []error
-	var mu sync.Mutex
+// DNSTestExecutor encapsulates DNS test execution logic.
+type DNSTestExecutor struct {
+	Config    cfg.Config
+	Client    dns.TinyDNSClient
+	Results   map[string]*dns.DNSRecords
+	Errors    map[string]error
+	AllErrors []error
+	mu        sync.Mutex
+}
+
+// NewDNSTestExecutor initializes a new DNSTestExecutor.
+func NewDNSTestExecutor(config cfg.Config, client dns.TinyDNSClient) *DNSTestExecutor {
+	return &DNSTestExecutor{
+		Config:  config,
+		Client:  client,
+		Results: make(map[string]*dns.DNSRecords),
+		Errors:  make(map[string]error),
+	}
+}
+
+// RunAllTests executes all DNS tests defined in the configuration.
+func (e *DNSTestExecutor) RunAllTests() error {
 	var wg sync.WaitGroup
 
-	hostTests := make(map[string][]cfg.DNSTestConfig)
-	results := make(map[string]*dns.DNSRecords)
-	errors := make(map[string]error)
+	hostTests := e.groupTestsByHost()
 
-	fmt.Printf("Using the following DNS server: %s\n\n", config.DNSServer)
-	for _, test := range config.Tests {
-		hostTests[test.Host] = append(hostTests[test.Host], test)
-	}
-
+	fmt.Printf("Using DNS server: %s\n\n", e.Config.DNSServer)
 	for host := range hostTests {
 		wg.Add(1)
-		go queryDNSForHost(host, config.DNSServer, client, results, errors, &mu, &wg)
+		go e.queryDNSForHost(host, &wg)
 	}
 	wg.Wait()
 
 	for host, tests := range hostTests {
-		runTestsForHost(host, tests, results, errors, &allErrors)
+		e.runTestsForHost(host, tests)
 	}
 
-	if len(allErrors) > 0 {
-		return fmt.Errorf("test failures:\n%v", allErrors)
+	if len(e.AllErrors) > 0 {
+		return fmt.Errorf("test failures:\n%v", e.AllErrors)
 	}
+	fmt.Printf("##########################################################\n")
 	return nil
 }
 
-func queryDNSForHost(host string, server string, client dns.TinyDNSClient, results map[string]*dns.DNSRecords, errors map[string]error, mu *sync.Mutex, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	records, err := dns.QueryDNS(host, server, client)
-	mu.Lock()
-	results[host] = records
-	errors[host] = err
-	mu.Unlock()
+// groupTestsByHost groups DNS tests by the host.
+func (e *DNSTestExecutor) groupTestsByHost() map[string][]cfg.DNSTestConfig {
+	hostTests := make(map[string][]cfg.DNSTestConfig)
+	for _, test := range e.Config.Tests {
+		hostTests[test.Host] = append(hostTests[test.Host], test)
+	}
+	return hostTests
 }
 
-func runTestsForHost(host string, tests []cfg.DNSTestConfig, results map[string]*dns.DNSRecords, errors map[string]error, allErrors *[]error) {
-	fmt.Printf("####################################################\n")
-	fmt.Printf("Running tests for: %s...\n", host)
+// queryDNSForHost queries the DNS for a specific host and stores the result.
+func (e *DNSTestExecutor) queryDNSForHost(host string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	defer e.mu.Unlock()
 
-	if err, found := errors[host]; found && err != nil {
+	records, err := dns.QueryDNS(host, e.Config.DNSServer, e.Client)
+	e.mu.Lock()
+
+	e.Results[host] = records
+	e.Errors[host] = err
+}
+
+// runTestsForHost runs all tests for a specific host.
+func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig) {
+	fmt.Printf("##########################################################\n")
+	fmt.Printf("Running tests for host: %s...\n", host)
+
+	if err, found := e.Errors[host]; found && err != nil {
 		fmt.Printf("Failed to query DNS for host %s: %v\n", host, err)
-		*allErrors = append(*allErrors, fmt.Errorf("failed to query DNS for host %s: %w", host, err))
+		e.AllErrors = append(e.AllErrors, fmt.Errorf("failed to query DNS for host %s: %w", host, err))
 		return
 	}
 
-	records := results[host]
-
+	records := e.Results[host]
 	for _, test := range tests {
-		fmt.Printf("----------------------------------------------------\n")
+		fmt.Printf("——————————————————————————————————————————————————————————\n")
 		fmt.Printf("Testing '%s' records\n", test.TestType)
-		var actualValues []string
-		switch test.TestType {
-		case "a":
-			actualValues = records.ARecords
-		case "aaaa":
-			actualValues = records.AAAARecords
-		case "cname":
-			actualValues = records.CNAMERecords
-		case "mx":
-			for _, mx := range records.MXRecords {
-				actualValues = append(actualValues, fmt.Sprintf("%s %d\n", mx.Host, mx.Pref))
-			}
-		case "txt":
-			actualValues = records.TXTRecords
-		case "ns":
-			actualValues = records.NSRecords
-		default:
-			*allErrors = append(*allErrors, fmt.Errorf("unknown test type: %s", test.TestType))
+		actualValues := e.getDNSRecords(test.TestType, records)
+		if actualValues == nil {
+			fmt.Printf("Unknown test type encountered: %s for host: %s\n", test.TestType, host)
+			e.AllErrors = append(e.AllErrors, fmt.Errorf("unknown test type: %s", test.TestType))
 			continue
+		}
+
+		if len(actualValues) == 0 {
+			fmt.Printf("No records found for test type: %s on host: %s\n", test.TestType, host)
 		}
 
 		if err := dns.CompareRecords(test.ExpectedValues, actualValues); err != nil {
 			fmt.Println("BAD — Records don't match the configuration")
-			*allErrors = append(*allErrors, fmt.Errorf("DNS check failed for host %s: %v", host, err))
+			e.AllErrors = append(e.AllErrors, fmt.Errorf("DNS check failed for host %s: %v", host, err))
 		} else {
 			fmt.Printf("GOOD — All records match the configuration\n")
 		}
 	}
-	fmt.Printf("####################################################\n\n")
+}
+
+// getDNSRecords returns the relevant DNS records based on the test type.
+func (e *DNSTestExecutor) getDNSRecords(testType string, records *dns.DNSRecords) []string {
+	switch testType {
+	case "a":
+		if len(records.ARecords) == 0 {
+			return []string{}
+		}
+		return records.ARecords
+	case "aaaa":
+		if len(records.AAAARecords) == 0 {
+			return []string{}
+		}
+		return records.AAAARecords
+	case "cname":
+		if len(records.CNAMERecords) == 0 {
+			return []string{}
+		}
+		return records.CNAMERecords
+	case "mx":
+		var mxRecords []string
+		for _, mx := range records.MXRecords {
+			mxRecords = append(mxRecords, fmt.Sprintf("%s %d", mx.Host, mx.Pref))
+		}
+		if len(mxRecords) == 0 {
+			return []string{}
+		}
+		return mxRecords
+	case "txt":
+		if len(records.TXTRecords) == 0 {
+			return []string{}
+		}
+		return records.TXTRecords
+	case "ns":
+		if len(records.NSRecords) == 0 {
+			return []string{}
+		}
+		return records.NSRecords
+	default:
+		fmt.Printf("Unhandled test type: %s\n", testType)
+		return nil
+	}
 }
