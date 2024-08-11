@@ -2,6 +2,10 @@
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 version: 2
 
+env:
+  - PROJECT_SLUG=ch0ppy35/sherlock
+  - REGISTRY=ghcr.io
+
 before:
   hooks:
     - go mod tidy
@@ -17,7 +21,7 @@ builds:
       - arm64
     ldflags: 
       - "-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser"
-      - "-X github.com/ch0ppy35/sherlock/cmd.version={{.Version}} -X github.com/ch0ppy35/sherlock/cmd.commit={{.Commit}} -X github.com/ch0ppy35/sherlock/cmd.date={{.Date}} -X github.com/ch0ppy35/sherlock/cmd.builtBy=goreleaser"
+      - "-X github.com/{{ .env.PROJECT_SLUG }}/cmd.version={{.Version}} -X github.com/{{ .env.PROJECT_SLUG }}/cmd.commit={{.Commit}} -X github.com/{{ .env.PROJECT_SLUG }}/cmd.date={{.Date}} -X github.com/{{ .env.PROJECT_SLUG }}/cmd.builtBy=goreleaser"
 
 archives:
   - format: tar.gz
@@ -41,7 +45,7 @@ changelog:
 
 dockers:
   - image_templates:
-      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-amd64"
+      - "{{ .env.REGISTRY }}/{{ .env.PROJECT_SLUG }}:{{ .Tag }}-amd64"
     use: buildx
     build_flag_templates:
       - "--pull"
@@ -50,7 +54,7 @@ dockers:
     goarch: amd64
     goos: linux
   - image_templates:
-      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-arm64"
+      - "{{ .env.REGISTRY }}/{{ .env.PROJECT_SLUG }}:{{ .Tag }}-arm64"
     use: buildx
     build_flag_templates:
       - "--pull"
@@ -60,7 +64,7 @@ dockers:
     goos: linux
 
 docker_manifests:
-  - name_template: "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}"
+  - name_template: "{{ .env.REGISTRY }}/{{ .env.PROJECT_SLUG }}:{{ .Tag }}"
     image_templates:
-      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-amd64"
-      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-arm64"
+      - "{{ .env.REGISTRY }}/{{ .env.PROJECT_SLUG }}:{{ .Tag }}-amd64"
+      - "{{ .env.REGISTRY }}/{{ .env.PROJECT_SLUG }}:{{ .Tag }}-arm64"
