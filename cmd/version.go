@@ -8,17 +8,17 @@ import (
 
 var (
 	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	commit  = "N/A"
+	date    = "NOW"
 )
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Display sherlock's version",
-	Long:  "The version command will display sherlock's version",
+	Short: "Display Sherlock's version",
+	Long:  "The version command will display Sherlock's version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version: %s  Commit: %s  Date: %s", version, commit, date)
+		fmt.Printf("Sherlock\nVersion: %s\nCommit: %s\nBuild Time: %s\n", version, commit, date)
 	},
 }
 
