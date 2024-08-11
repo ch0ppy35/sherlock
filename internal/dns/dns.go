@@ -33,7 +33,46 @@ func (m *MockTinyDNSClient) Exchange(msg *dns.Msg, server string) (*dns.Msg, tim
 	return m.MockExchange(msg, server)
 }
 
-// compareRecords compares the expected and actual DNS records and returns an error if they don't match.
+func (r *DNSRecords) addARecord(rr dns.RR) {
+	if a, ok := rr.(*dns.A); ok {
+		r.ARecords = append(r.ARecords, a.A.String())
+	}
+}
+
+func (r *DNSRecords) addAAAARecord(rr dns.RR) {
+	if aaaa, ok := rr.(*dns.AAAA); ok {
+		r.AAAARecords = append(r.AAAARecords, aaaa.AAAA.String())
+	}
+}
+
+func (r *DNSRecords) addCNAMERecord(rr dns.RR) {
+	if cname, ok := rr.(*dns.CNAME); ok {
+		r.CNAMERecords = append(r.CNAMERecords, cname.Target)
+	}
+}
+
+func (r *DNSRecords) addMXRecord(rr dns.RR) {
+	if mx, ok := rr.(*dns.MX); ok {
+		r.MXRecords = append(r.MXRecords, MXRecord{
+			Host: mx.Mx,
+			Pref: mx.Preference,
+		})
+	}
+}
+
+func (r *DNSRecords) addTXTRecord(rr dns.RR) {
+	if txt, ok := rr.(*dns.TXT); ok {
+		r.TXTRecords = append(r.TXTRecords, txt.Txt...)
+	}
+}
+
+func (r *DNSRecords) addNSRecord(rr dns.RR) {
+	if ns, ok := rr.(*dns.NS); ok {
+		r.NSRecords = append(r.NSRecords, ns.Ns)
+	}
+}
+
+// CompareRecords compares the expected and actual DNS records and returns an error if they don't match.
 func CompareRecords(expected []string, actual []string) error {
 	expectedMap := make(map[string]struct{}, len(expected))
 	for _, val := range expected {
@@ -101,49 +140,19 @@ func QueryDNS(domain string, dnsServer string, client TinyDNSClient) (*DNSRecord
 	records := &DNSRecords{}
 	server := dnsServer + ":53"
 
-	// Query and process each record type
-	queryTypes := []struct {
-		qtype  uint16
-		setter func(rr dns.RR)
-	}{
-		{dns.TypeA, func(rr dns.RR) {
-			if a, ok := rr.(*dns.A); ok {
-				records.ARecords = append(records.ARecords, a.A.String())
-			}
-		}},
-		{dns.TypeAAAA, func(rr dns.RR) {
-			if aaaa, ok := rr.(*dns.AAAA); ok {
-				records.AAAARecords = append(records.AAAARecords, aaaa.AAAA.String())
-			}
-		}},
-		{dns.TypeCNAME, func(rr dns.RR) {
-			if cname, ok := rr.(*dns.CNAME); ok {
-				records.CNAMERecords = append(records.CNAMERecords, cname.Target)
-			}
-		}},
-		{dns.TypeMX, func(rr dns.RR) {
-			if mx, ok := rr.(*dns.MX); ok {
-				records.MXRecords = append(records.MXRecords, MXRecord{
-					Host: mx.Mx,
-					Pref: mx.Preference,
-				})
-			}
-		}},
-		{dns.TypeTXT, func(rr dns.RR) {
-			if txt, ok := rr.(*dns.TXT); ok {
-				records.TXTRecords = append(records.TXTRecords, txt.Txt...)
-			}
-		}},
-		{dns.TypeNS, func(rr dns.RR) {
-			if ns, ok := rr.(*dns.NS); ok {
-				records.NSRecords = append(records.NSRecords, ns.Ns)
-			}
-		}},
+	// Map of DNS record types to their corresponding handler functions
+	queryTypes := map[uint16]func(rr dns.RR){
+		dns.TypeA:     records.addARecord,
+		dns.TypeAAAA:  records.addAAAARecord,
+		dns.TypeCNAME: records.addCNAMERecord,
+		dns.TypeMX:    records.addMXRecord,
+		dns.TypeTXT:   records.addTXTRecord,
+		dns.TypeNS:    records.addNSRecord,
 	}
 
-	for _, qt := range queryTypes {
-		if err := QueryDNSRecord(client, domain, server, qt.qtype, qt.setter); err != nil {
-			return nil, fmt.Errorf("failed to query DNS records for type %d: %w", qt.qtype, err)
+	for qtype, setter := range queryTypes {
+		if err := QueryDNSRecord(client, domain, server, qtype, setter); err != nil {
+			return nil, fmt.Errorf("failed to query DNS records: %w", err)
 		}
 	}
 

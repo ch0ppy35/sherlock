@@ -78,7 +78,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 				},
 			},
 			mockError:     fmt.Errorf("network error"),
-			expectedError: "test failures:\n[failed to query DNS for host example.com: failed to query DNS records for type 1: network error]",
+			expectedError: "test failures:\n[failed to query DNS for host example.com: failed to query DNS records: network error]",
 		},
 		{
 			name: "Empty configuration",
