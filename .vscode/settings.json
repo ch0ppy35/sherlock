@@ -2,12 +2,5 @@
   "yaml.schemas": {
     "https://json.schemastore.org/yamllint.json": ["config/config*.yaml"]
   },
-  "cSpell.words": [
-    "buildx",
-    "dnstest",
-    "goreleaser",
-    "miekg",
-    "qtype",
-    "stretchr"
-  ]
+  "cSpell.words": ["buildx", "goreleaser", "miekg", "qtype", "stretchr"]
 }
