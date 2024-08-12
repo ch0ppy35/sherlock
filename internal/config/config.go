@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 
+	"github.com/ch0ppy35/sherlock/internal/ui"
 	"github.com/spf13/viper"
 )
 
@@ -35,7 +36,7 @@ func LoadConfig(configFile string) (Config, error) {
 	}
 
 	if config.DNSServer == "" {
-		fmt.Println("DNS server not set, using Cloudflare as default")
+		ui.PrintMsgWithStatus("WARN", "hiYellow", "DNS server not set, using Cloudflare as default (1.1.1.1)\n")
 		config.DNSServer = "1.1.1.1"
 	}
 	return config, nil

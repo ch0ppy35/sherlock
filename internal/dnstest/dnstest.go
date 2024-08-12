@@ -38,7 +38,7 @@ func (e *DNSTestExecutor) RunAllTests() error {
 	hostTests := e.groupTestsByHost()
 
 	// fmt.Printf("Using DNS server: %s\n", e.Config.DNSServer)
-	ui.PrintMsgWithStatus("INFO", "yellow", "Using DNS server: %s\n", e.Config.DNSServer)
+	ui.PrintMsgWithStatus("INFO", "magenta", "Using DNS server: %s\n", e.Config.DNSServer)
 	for host := range hostTests {
 		wg.Add(1)
 		go e.queryDNSForHost(host, &wg)

@@ -20,21 +20,25 @@ var versionCmd = &cobra.Command{
 	Short: "Display Sherlock's version",
 	Long:  "The version command will display Sherlock's version",
 	Run: func(cmd *cobra.Command, args []string) {
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.SetStyle(table.StyleRounded)
-		t.Style().Title.Align = text.AlignCenter
-
-		t.SetTitle("Sherlock Info")
-		t.AppendRows([]table.Row{
-			{"App Version", version},
-			{"Commit", commit},
-			{"Build Time", date},
-		})
-		t.Render()
+		printVersionInfo()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+}
+
+func printVersionInfo() {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleRounded)
+	t.Style().Title.Align = text.AlignCenter
+
+	t.SetTitle("Sherlock Info")
+	t.AppendRows([]table.Row{
+		{"App Version", version},
+		{"Commit", commit},
+		{"Build Time", date},
+	})
+	t.Render()
 }
