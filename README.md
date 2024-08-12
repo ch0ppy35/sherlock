@@ -45,5 +45,5 @@ Replace `path/to/config.yaml` with the actual path to your configuration file.
 Alternatively, you can run Sherlock inside a Docker container. First, ensure you have a Docker image built or available. Then, execute:
 
 ```bash
-docker run --rm -it -v "$(pwd)/config:/app/config" ghcr.io/ch0ppy35/sherlock:v0.3.0 run --config /app/config/config.yaml
+docker run --rm -it -v "$(pwd)/config:/app/config" ghcr.io/ch0ppy35/sherlock:v0.4.2 run --config /app/config/config.yaml
 ```
