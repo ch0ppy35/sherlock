@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"os"
 
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +20,18 @@ var versionCmd = &cobra.Command{
 	Short: "Display Sherlock's version",
 	Long:  "The version command will display Sherlock's version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Sherlock\nVersion: %s\nCommit: %s\nBuild Time: %s\n", version, commit, date)
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.SetStyle(table.StyleRounded)
+		t.Style().Title.Align = text.AlignCenter
+
+		t.SetTitle("Sherlock Info")
+		t.AppendRows([]table.Row{
+			{"App Version", version},
+			{"Commit", commit},
+			{"Build Time", date},
+		})
+		t.Render()
 	},
 }
 

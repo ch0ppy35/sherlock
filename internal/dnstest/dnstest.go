@@ -6,25 +6,28 @@ import (
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
 	"github.com/ch0ppy35/sherlock/internal/dns"
+	"github.com/ch0ppy35/sherlock/internal/ui"
 )
 
-// DNSTestExecutor encapsulates DNS test execution logic.
 type DNSTestExecutor struct {
-	Config    cfg.Config
-	Client    dns.TinyDNSClient
-	Results   map[string]*dns.DNSRecords
-	Errors    map[string]error
-	AllErrors []error
-	mu        sync.Mutex
+	Config       cfg.Config
+	Client       dns.TinyDNSClient
+	ColorWriters ui.ColorWriters
+	Results      map[string]*dns.DNSRecords
+	Errors       map[string]error
+	AllErrors    []error
+	mu           sync.Mutex
 }
 
-// NewDNSTestExecutor initializes a new DNSTestExecutor.
+type ColorWriter func(a ...interface{}) string
+
 func NewDNSTestExecutor(config cfg.Config, client dns.TinyDNSClient) *DNSTestExecutor {
 	return &DNSTestExecutor{
-		Config:  config,
-		Client:  client,
-		Results: make(map[string]*dns.DNSRecords),
-		Errors:  make(map[string]error),
+		Config:       config,
+		Client:       client,
+		ColorWriters: ui.DefaultColorWriters,
+		Results:      make(map[string]*dns.DNSRecords),
+		Errors:       make(map[string]error),
 	}
 }
 
@@ -34,7 +37,8 @@ func (e *DNSTestExecutor) RunAllTests() error {
 
 	hostTests := e.groupTestsByHost()
 
-	fmt.Printf("Using DNS server: %s\n\n", e.Config.DNSServer)
+	// fmt.Printf("Using DNS server: %s\n", e.Config.DNSServer)
+	ui.PrintMsgWithStatus("INFO", "yellow", "Using DNS server: %s\n", e.Config.DNSServer)
 	for host := range hostTests {
 		wg.Add(1)
 		go e.queryDNSForHost(host, &wg)
@@ -46,9 +50,10 @@ func (e *DNSTestExecutor) RunAllTests() error {
 	}
 
 	if len(e.AllErrors) > 0 {
+		fmt.Printf("\n")
 		return fmt.Errorf("test failures:\n%v", e.AllErrors)
 	}
-	fmt.Printf("##########################################################\n")
+	fmt.Printf("\n")
 	return nil
 }
 
@@ -75,8 +80,7 @@ func (e *DNSTestExecutor) queryDNSForHost(host string, wg *sync.WaitGroup) {
 
 // runTestsForHost runs all tests for a specific host.
 func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig) {
-	fmt.Printf("##########################################################\n")
-	fmt.Printf("Running tests for host: %s...\n", host)
+	fmt.Printf("\nRunning tests for host: %s...\n", host)
 
 	if err, found := e.Errors[host]; found && err != nil {
 		fmt.Printf("Failed to query DNS for host %s: %v\n", host, err)
@@ -86,7 +90,7 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 
 	records := e.Results[host]
 	for _, test := range tests {
-		fmt.Printf("——————————————————————————————————————————————————————————\n")
+		ui.PrintDashes()
 		fmt.Printf("Testing '%s' records\n", test.TestType)
 		actualValues := e.getDNSRecords(test.TestType, records)
 		if actualValues == nil {
@@ -100,10 +104,11 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 		}
 
 		if err := dns.CompareRecords(test.ExpectedValues, actualValues); err != nil {
-			fmt.Println("BAD — Records don't match the configuration")
+
+			ui.PrintMsgWithStatus("BAD", "red", "Records don't match the configuration\n")
 			e.AllErrors = append(e.AllErrors, fmt.Errorf("DNS check failed for host %s: %v", host, err))
 		} else {
-			fmt.Printf("GOOD — All records match the configuration\n")
+			ui.PrintMsgWithStatus("GOOD", "green", "All records match the configuration\n")
 		}
 	}
 }

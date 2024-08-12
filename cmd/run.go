@@ -27,18 +27,7 @@ values and report any discrepancies after all tests are completed.
 Example usage:
   sherlock run --config path/to/config.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, err := cfg.LoadConfig(configFile)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
-			os.Exit(1)
-		}
-		client := new(dns.Client)
-		executor := dnstest.NewDNSTestExecutor(config, client)
-		err = executor.RunAllTests()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error running tests: %v\n", err)
-			os.Exit(1)
-		}
+		runTests()
 	},
 }
 
@@ -47,4 +36,19 @@ func init() {
 
 	runCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file (should be in config/config.yaml)")
 	runCmd.MarkPersistentFlagRequired("config")
+}
+
+func runTests() {
+	config, err := cfg.LoadConfig(configFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
+		os.Exit(1)
+	}
+	client := new(dns.Client)
+	executor := dnstest.NewDNSTestExecutor(config, client)
+	err = executor.RunAllTests()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "One or more tests failed, check above\n")
+		os.Exit(1)
+	}
 }
