@@ -10,24 +10,20 @@ import (
 )
 
 type DNSTestExecutor struct {
-	Config       cfg.Config
-	Client       dns.TinyDNSClient
-	ColorWriters ui.ColorWriters
-	Results      map[string]*dns.DNSRecords
-	Errors       map[string]error
-	AllErrors    []error
-	mu           sync.Mutex
+	Config    cfg.Config
+	Client    dns.TinyDNSClient
+	Results   map[string]*dns.DNSRecords
+	Errors    map[string]error
+	AllErrors []error
+	mu        sync.Mutex
 }
-
-type ColorWriter func(a ...interface{}) string
 
 func NewDNSTestExecutor(config cfg.Config, client dns.TinyDNSClient) *DNSTestExecutor {
 	return &DNSTestExecutor{
-		Config:       config,
-		Client:       client,
-		ColorWriters: ui.DefaultColorWriters,
-		Results:      make(map[string]*dns.DNSRecords),
-		Errors:       make(map[string]error),
+		Config:  config,
+		Client:  client,
+		Results: make(map[string]*dns.DNSRecords),
+		Errors:  make(map[string]error),
 	}
 }
 
@@ -37,7 +33,6 @@ func (e *DNSTestExecutor) RunAllTests() error {
 
 	hostTests := e.groupTestsByHost()
 
-	// fmt.Printf("Using DNS server: %s\n", e.Config.DNSServer)
 	ui.PrintMsgWithStatus("INFO", "magenta", "Using DNS server: %s\n", e.Config.DNSServer)
 	for host := range hostTests {
 		wg.Add(1)
@@ -104,7 +99,6 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 		}
 
 		if err := dns.CompareRecords(test.ExpectedValues, actualValues); err != nil {
-
 			ui.PrintMsgWithStatus("BAD", "red", "Records don't match the configuration\n")
 			e.AllErrors = append(e.AllErrors, fmt.Errorf("DNS check failed for host %s: %v", host, err))
 		} else {
