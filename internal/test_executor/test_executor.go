@@ -1,4 +1,4 @@
-package dnstest
+package test_executor
 
 import (
 	"fmt"

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
-	"github.com/ch0ppy35/sherlock/internal/dnstest"
+	"github.com/ch0ppy35/sherlock/internal/test_executor"
 	"github.com/ch0ppy35/sherlock/internal/ui"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
@@ -46,7 +46,7 @@ func runTests() {
 		os.Exit(1)
 	}
 	client := new(dns.Client)
-	executor := dnstest.NewDNSTestExecutor(config, client)
+	executor := test_executor.NewDNSTestExecutor(config, client)
 	err = executor.RunAllTests()
 	if err != nil {
 		ui.PrintMsgWithStatus("FAIL", "red", "One or more tests failed, check above\n")

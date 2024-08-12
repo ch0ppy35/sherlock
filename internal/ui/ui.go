@@ -34,5 +34,10 @@ func PrintDashes() {
 }
 
 func PrintMsgWithStatus(status string, color string, format string, a ...any) {
-	fmt.Printf("%s — %s", DefaultColorWriters[color](status), fmt.Sprintf(format, a...))
+	writer, ok := DefaultColorWriters[color]
+	if !ok {
+		fmt.Printf("%s — %s", status, fmt.Sprintf(format, a...))
+		return
+	}
+	fmt.Printf("%s — %s", writer(status), fmt.Sprintf(format, a...))
 }

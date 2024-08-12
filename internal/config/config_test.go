@@ -1,10 +1,8 @@
 package config
 
 import (
-	"os"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -61,28 +59,24 @@ func TestLoadConfig(t *testing.T) {
 		},
 	}
 
-	// Create test files for the tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.configFile == "testdata/empty_config.yaml" {
-				// Create an empty file
-				f, err := os.Create(tt.configFile)
-				if err != nil {
-					t.Fatalf("failed to create empty config file: %v", err)
-				}
-				f.Close()
-			}
-
 			config, err := LoadConfig(tt.configFile)
+
 			if tt.expectError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, config)
+				if err == nil {
+					t.Errorf("expected an error but got nil")
+				}
+				return
 			}
 
-			if tt.configFile == "testdata/empty_config.yaml" {
-				os.Remove(tt.configFile)
+			if err != nil {
+				t.Errorf("didn't expect an error but got %v", err)
+				return
+			}
+
+			if !reflect.DeepEqual(tt.expected, config) {
+				t.Errorf("expected config %+v, but got %+v", tt.expected, config)
 			}
 		})
 	}
