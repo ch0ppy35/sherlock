@@ -2,6 +2,7 @@ package test_executor
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
@@ -109,7 +110,7 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 
 // getDNSRecords returns the relevant DNS records based on the test type.
 func (e *DNSTestExecutor) getDNSRecords(testType string, records *dns.DNSRecords) []string {
-	switch testType {
+	switch strings.ToLower(testType) {
 	case "a":
 		if len(records.ARecords) == 0 {
 			return []string{}

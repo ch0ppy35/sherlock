@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
@@ -34,14 +33,14 @@ values and report any discrepancies after all tests are completed.`,
 func runTests() {
 	config, err := cfg.LoadConfig(configFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
+		ui.PrintMsgWithStatus("ERROR", "hiRed", "Trouble loading the config: %v\n", err)
 		os.Exit(1)
 	}
 	client := new(dns.Client)
 	executor := test_executor.NewDNSTestExecutor(config, client)
 	err = executor.RunAllTests()
 	if err != nil {
-		ui.PrintMsgWithStatus("FAIL", "red", "One or more tests failed, check above\n")
+		ui.PrintMsgWithStatus("FAIL", "hiRed", "One or more tests failed, check above\n")
 		os.Exit(1)
 	}
 }

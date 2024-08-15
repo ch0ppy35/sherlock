@@ -1,0 +1,10 @@
+dnsServer: "1.1.1.1"
+tests:
+  - host: sftp.foobar.com
+    expectedValues: ["10.0.0.10", "10.1.0.10", "10.3.0.10"]
+    testType: a
+  - host: sftp.foobar.com
+    expectedValues: ["s-12345678900f0000a.server.transfer.us-east-1.amazonaws.com."]
+  - host: grafana.foobar.com
+    expectedValues: ["10.0.0.100"]
+    testType: a

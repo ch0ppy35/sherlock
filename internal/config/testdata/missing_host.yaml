@@ -1,0 +1,7 @@
+dnsServer: "8.8.8.8"
+tests:
+  - expectedValues: ["1.1.1.1"]
+    host: "example.com"
+    testType: "A"
+  - expectedValues: ["text value"]
+    testType: "TXT"

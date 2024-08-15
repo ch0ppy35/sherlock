@@ -57,6 +57,26 @@ func TestLoadConfig(t *testing.T) {
 			},
 			expectError: false,
 		},
+		{
+			name:        "No Tests Defined",
+			configFile:  "testdata/no_tests_defined.yaml",
+			expectError: true,
+		},
+		{
+			name:        "Missing Expected Values",
+			configFile:  "testdata/missing_expected_values.yaml",
+			expectError: true,
+		},
+		{
+			name:        "Missing Host",
+			configFile:  "testdata/missing_host.yaml",
+			expectError: true,
+		},
+		{
+			name:        "Missing Test Type",
+			configFile:  "testdata/missing_test_type.yaml",
+			expectError: true,
+		},
 	}
 
 	for _, tt := range tests {
