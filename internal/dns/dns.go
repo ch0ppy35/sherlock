@@ -2,6 +2,7 @@ package dns
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/miekg/dns"
@@ -110,4 +111,68 @@ func QueryDNSRecord(client TinyDNSClient, domain string, server string, qtype ui
 	}
 
 	return nil
+}
+
+// QueryAndExtract handles the DNS query and extracts the relevant records.
+func QueryAndExtract(client TinyDNSClient, testType, dnsServer, domain string) ([]string, error) {
+	qtype, err := GetQueryType(testType)
+	if err != nil {
+		return nil, err
+	}
+
+	records, err := QueryDNS(domain, dnsServer, client)
+	if err != nil {
+		return nil, err
+	}
+
+	result := ExtractRecords(records, qtype)
+	if result == nil {
+		return []string{}, nil
+	}
+
+	return result, nil
+}
+
+// GetQueryType maps the string test type to the corresponding DNS query type.
+func GetQueryType(testType string) (uint16, error) {
+	switch strings.ToLower(testType) {
+	case "a":
+		return dns.TypeA, nil
+	case "aaaa":
+		return dns.TypeAAAA, nil
+	case "cname":
+		return dns.TypeCNAME, nil
+	case "mx":
+		return dns.TypeMX, nil
+	case "txt":
+		return dns.TypeTXT, nil
+	case "ns":
+		return dns.TypeNS, nil
+	default:
+		return 0, fmt.Errorf("unsupported test type. Supported types: a, aaaa, cname, mx, txt, ns")
+	}
+}
+
+// ExtractRecords extracts records from the DNS query results based on the query type.
+func ExtractRecords(records *DNSRecords, qtype uint16) []string {
+	switch qtype {
+	case dns.TypeA:
+		return records.ARecords
+	case dns.TypeAAAA:
+		return records.AAAARecords
+	case dns.TypeCNAME:
+		return records.CNAMERecords
+	case dns.TypeMX:
+		hosts := []string{}
+		for _, mx := range records.MXRecords {
+			hosts = append(hosts, mx.Host)
+		}
+		return hosts
+	case dns.TypeTXT:
+		return records.TXTRecords
+	case dns.TypeNS:
+		return records.NSRecords
+	default:
+		return []string{}
+	}
 }

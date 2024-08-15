@@ -24,10 +24,6 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(versionCmd)
-}
-
 func printVersionInfo() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
@@ -41,4 +37,8 @@ func printVersionInfo() {
 		{"Build Time", date},
 	})
 	t.Render()
+}
+
+func init() {
+	rootCmd.AddCommand(versionCmd)
 }

@@ -227,3 +227,266 @@ func TestQueryDNS(t *testing.T) {
 		})
 	}
 }
+
+func TestQueryAndExtract(t *testing.T) {
+	tests := []struct {
+		name          string
+		testType      string
+		domain        string
+		dnsServer     string
+		mockResponses map[uint16]*dns.Msg
+		mockError     error
+		expected      []string
+		expectError   bool
+	}{
+		{
+			name:      "Valid A record extraction",
+			testType:  "a",
+			domain:    "example.com",
+			dnsServer: "8.8.8.8",
+			mockResponses: map[uint16]*dns.Msg{
+				dns.TypeA: {
+					Answer: []dns.RR{
+						&dns.A{Hdr: dns.RR_Header{Name: "example.com."}, A: net.ParseIP("10.0.0.1")},
+					},
+				},
+			},
+			expected:    []string{"10.0.0.1"},
+			expectError: false,
+		},
+		{
+			name:      "Valid MX record extraction",
+			testType:  "mx",
+			domain:    "example.com",
+			dnsServer: "8.8.8.8",
+			mockResponses: map[uint16]*dns.Msg{
+				dns.TypeMX: {
+					Answer: []dns.RR{
+						&dns.MX{Hdr: dns.RR_Header{Name: "example.com."}, Mx: "mail.example.com.", Preference: 10},
+					},
+				},
+			},
+			expected:    []string{"mail.example.com."},
+			expectError: false,
+		},
+		{
+			name:      "Query with no answers",
+			testType:  "a",
+			domain:    "example.com",
+			dnsServer: "8.8.8.8",
+			mockResponses: map[uint16]*dns.Msg{
+				dns.TypeA: {},
+			},
+			expected:    []string{},
+			expectError: false,
+		},
+		{
+			name:        "Query returns an error",
+			testType:    "a",
+			domain:      "example.com",
+			dnsServer:   "8.8.8.8",
+			mockError:   fmt.Errorf("network error"),
+			expectError: true,
+		},
+		{
+			name:        "Invalid query type",
+			testType:    "invalid",
+			domain:      "example.com",
+			dnsServer:   "8.8.8.8",
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &MockTinyDNSClient{
+				MockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
+					if tt.mockError != nil {
+						return nil, 0, tt.mockError
+					}
+					if resp, ok := tt.mockResponses[msg.Question[0].Qtype]; ok {
+						return resp, 0, nil
+					}
+					return &dns.Msg{}, 0, nil
+				},
+			}
+
+			got, err := QueryAndExtract(client, tt.testType, tt.dnsServer, tt.domain)
+			if (err != nil) != tt.expectError {
+				t.Errorf("QueryAndExtract() error = %v, expectError %v", err, tt.expectError)
+				return
+			}
+
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Errorf("QueryAndExtract() = %v, expected %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestGetQueryType(t *testing.T) {
+	tests := []struct {
+		name     string
+		testType string
+		want     uint16
+		wantErr  bool
+	}{
+		{
+			name:     "Valid A record type",
+			testType: "a",
+			want:     dns.TypeA,
+			wantErr:  false,
+		},
+		{
+			name:     "Valid AAAA record type",
+			testType: "aaaa",
+			want:     dns.TypeAAAA,
+			wantErr:  false,
+		},
+		{
+			name:     "Valid CNAME record type",
+			testType: "cname",
+			want:     dns.TypeCNAME,
+			wantErr:  false,
+		},
+		{
+			name:     "Valid MX record type",
+			testType: "mx",
+			want:     dns.TypeMX,
+			wantErr:  false,
+		},
+		{
+			name:     "Valid TXT record type",
+			testType: "txt",
+			want:     dns.TypeTXT,
+			wantErr:  false,
+		},
+		{
+			name:     "Valid NS record type",
+			testType: "ns",
+			want:     dns.TypeNS,
+			wantErr:  false,
+		},
+		{
+			name:     "Invalid record type",
+			testType: "invalid",
+			want:     0,
+			wantErr:  true,
+		},
+		{
+			name:     "Empty record type",
+			testType: "",
+			want:     0,
+			wantErr:  true,
+		},
+		{
+			name:     "Mixed case record type",
+			testType: "Mx",
+			want:     dns.TypeMX,
+			wantErr:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetQueryType(tt.testType)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetQueryType() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetQueryType() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExtractRecords(t *testing.T) {
+	type args struct {
+		records *DNSRecords
+		qtype   uint16
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Extract A records",
+			args: args{
+				records: &DNSRecords{
+					ARecords: []string{"10.0.0.1"},
+				},
+				qtype: dns.TypeA,
+			},
+			want: []string{"10.0.0.1"},
+		},
+		{
+			name: "Extract AAAA records",
+			args: args{
+				records: &DNSRecords{
+					AAAARecords: []string{"2001:db8::1"},
+				},
+				qtype: dns.TypeAAAA,
+			},
+			want: []string{"2001:db8::1"},
+		},
+		{
+			name: "Extract CNAME records",
+			args: args{
+				records: &DNSRecords{
+					CNAMERecords: []string{"example.com."},
+				},
+				qtype: dns.TypeCNAME,
+			},
+			want: []string{"example.com."},
+		},
+		{
+			name: "Extract MX records",
+			args: args{
+				records: &DNSRecords{
+					MXRecords: []MXRecord{
+						{Host: "mail.example.com.", Pref: 10},
+					},
+				},
+				qtype: dns.TypeMX,
+			},
+			want: []string{"mail.example.com."},
+		},
+		{
+			name: "Extract TXT records",
+			args: args{
+				records: &DNSRecords{
+					TXTRecords: []string{"v=spf1 include:_spf.example.com ~all"},
+				},
+				qtype: dns.TypeTXT,
+			},
+			want: []string{"v=spf1 include:_spf.example.com ~all"},
+		},
+		{
+			name: "Extract NS records",
+			args: args{
+				records: &DNSRecords{
+					NSRecords: []string{"ns1.example.com."},
+				},
+				qtype: dns.TypeNS,
+			},
+			want: []string{"ns1.example.com."},
+		},
+		{
+			name: "Record type not found",
+			args: args{
+				records: &DNSRecords{},
+				qtype:   0,
+			},
+			want: []string{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ExtractRecords(tt.args.records, tt.args.qtype); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ExtractRecords() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

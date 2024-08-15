@@ -32,13 +32,6 @@ Example usage:
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(runCmd)
-
-	runCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file (should be in config/config.yaml)")
-	runCmd.MarkPersistentFlagRequired("config")
-}
-
 func runTests() {
 	config, err := cfg.LoadConfig(configFile)
 	if err != nil {
@@ -52,4 +45,11 @@ func runTests() {
 		ui.PrintMsgWithStatus("FAIL", "red", "One or more tests failed, check above\n")
 		os.Exit(1)
 	}
+}
+
+func init() {
+	rootCmd.AddCommand(runCmd)
+
+	runCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file (should be in config/config.yaml)")
+	runCmd.MarkPersistentFlagRequired("config")
 }

@@ -10,6 +10,10 @@ clean:
 	rm -rf bin/
 	rm -rf dist/
 
+.PHONY: clean-cache
+clean-cache:
+	go clean -testcache
+
 .PHONY: docker-build
 docker-build:
 	docker build -t ghcr.io/ch0ppy35/sherlock:latest .
