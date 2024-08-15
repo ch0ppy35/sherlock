@@ -2,7 +2,7 @@
 build:
 	go build -ldflags "-X github.com/ch0ppy35/sherlock/cmd.version=LOCALBUILD \
 	-X github.com/ch0ppy35/sherlock/cmd.commit=mainline \
-	-X github.com/ch0ppy35/sherlock/cmd.date=$$(date -u +'%Y%m%d%H%M') \
+	-X github.com/ch0ppy35/sherlock/cmd.date=$$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
 	-X github.com/ch0ppy35/sherlock/cmd.arch=$$(go env GOARCH)" \
 	-o bin/sherlock .
 
