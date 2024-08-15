@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	arch    = ""
 	version = "dev"
 	commit  = "N/A"
 	date    = "NOW"
@@ -33,6 +34,7 @@ func printVersionInfo() {
 	t.SetTitle("Sherlock Info")
 	t.AppendRows([]table.Row{
 		{"App Version", version},
+		{"Arch", arch},
 		{"Commit", commit},
 		{"Build Time", date},
 	})

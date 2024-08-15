@@ -17,7 +17,7 @@ builds:
       - arm64
     ldflags: 
       - "-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}"
-      - "-X github.com/ch0ppy35/sherlock/cmd.version={{.Version}} -X github.com/ch0ppy35/sherlock/cmd.commit={{.Commit}} -X github.com/ch0ppy35/sherlock/cmd.date={{.Date}}"
+      - "-X github.com/ch0ppy35/sherlock/cmd.version={{.Version}} -X github.com/ch0ppy35/sherlock/cmd.commit={{.Commit}} -X github.com/ch0ppy35/sherlock/cmd.date={{.Date}} -X github.com/ch0ppy35/sherlock/cmd.arch={{.Arch}}"
 
 archives:
   - format: tar.gz
