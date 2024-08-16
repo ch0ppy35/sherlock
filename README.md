@@ -4,13 +4,17 @@ A CLI tool for testing DNS records.
 
 ## Overview
 
-Sherlock is a command-line tool designed to perform DNS record tests based on a specified configuration file. It allows you to run various types of DNS checks, such as verifying A, AAAA, CNAME, MX, TXT, and NS records.
+Sherlock is a command-line tool designed to perform DNS record tests based on a specified configuration file or individual params. It allows you to run various types of DNS checks, such as verifying A, AAAA, CNAME, MX, TXT, and NS records.
+
+This tool supports a configuration file in YAML format where you can define the expected DNS records for different hosts. The 'run' command executes all tests defined in the configuration and provides a summary of any discrepancies found. Alternatively, you can use the 'test' command to query a DNS server for a specific record type and compare the results with expected values directly from the command line.
 
 This tool is generally intended to be used within a container, making it ideal for integration into CI/CD pipelines or scheduled tasks like cron jobs running in Kubernetes. Binaries are also provided in the GitHub release, or you can build the binary locally using the `make` command.
 
-Sherlock supports a configuration file in YAML format where you can define the expected DNS records for different hosts. The `run` command executes all tests defined in the configuration and provides a summary of any discrepancies found.
+See `sherlock -h` for more info
 
-## Configuration
+## Usage
+
+### Config File
 
 Create a YAML configuration file specifying the DNS tests you want to perform. Below is an example configuration:
 
@@ -28,22 +32,33 @@ tests:
     testType: a
 ```
 
-## Usage
-
 ### Running Tests
-
-Execute the DNS tests defined in your configuration file using the following command:
 
 ```bash
 sherlock run --config path/to/config.yaml
-```
 
-Replace `path/to/config.yaml` with the actual path to your configuration file.
+# or
+
+sherlock test --server 1.1.1.1 --host prom.example.com --expected "10.0.0.1" --type a
+```
 
 ### Docker
 
-Alternatively, you can run Sherlock inside a Docker container. First, ensure you have a Docker image built or available. Then, execute:
+Alternatively, you can run Sherlock inside a Docker container
 
 ```bash
-docker run --rm -it -v "$(pwd)/config:/app/config" ghcr.io/ch0ppy35/sherlock:v0.5.0 run --config /app/config/config.yaml
+docker run --rm -it \
+  -v "$(pwd)/config:/app/config" \
+  ghcr.io/ch0ppy35/sherlock:v0.5.0 \
+  run --config /app/config/config.yaml
+
+# or
+
+docker run --rm -it \
+  ghcr.io/ch0ppy35/sherlock:v0.5.0 \
+  test --server 1.1.1.1 \
+       --host prom.example.com \
+       --expected "10.0.0.1" \
+       --type a
+
 ```
