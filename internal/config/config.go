@@ -18,6 +18,30 @@ type DNSTestConfig struct {
 	TestType       string   `yaml:"testType"`       // Required
 }
 
+func (c *Config) validate() error {
+	if len(c.Tests) == 0 {
+		return fmt.Errorf("no tests defined in the configuration")
+	}
+
+	if c.DNSServer == "" {
+		ui.PrintMsgWithStatus("WARN", "hiYellow", "DNS server not set, using Cloudflare as default\n")
+		c.DNSServer = "1.1.1.1"
+	}
+
+	for i, test := range c.Tests {
+		if len(test.ExpectedValues) == 0 {
+			return fmt.Errorf("test %d 'expectedValues' must be set and contain at least one value", i+1)
+		}
+		if test.Host == "" {
+			return fmt.Errorf("test %d 'host' must be set", i+1)
+		}
+		if test.TestType == "" {
+			return fmt.Errorf("test %d 'testType' must be set", i+1)
+		}
+	}
+	return nil
+}
+
 func LoadConfig(configFile string) (Config, error) {
 	var config Config
 	if configFile == "" {
@@ -35,28 +59,8 @@ func LoadConfig(configFile string) (Config, error) {
 		return Config{}, fmt.Errorf("unable to decode into struct: %w", err)
 	}
 
-	// Set default DNS server if not provided
-	if config.DNSServer == "" {
-		ui.PrintMsgWithStatus("WARN", "hiYellow", "DNS server not set, using Cloudflare as default\n")
-		config.DNSServer = "1.1.1.1"
-	}
-
-	// Validate that at least one test is defined
-	if len(config.Tests) == 0 {
-		return Config{}, fmt.Errorf("no tests defined in the configuration")
-	}
-
-	// Validate each test to ensure all required fields are set
-	for i, test := range config.Tests {
-		if len(test.ExpectedValues) == 0 {
-			return Config{}, fmt.Errorf("test %d 'expectedValues' must be set and contain at least one value", i+1)
-		}
-		if test.Host == "" {
-			return Config{}, fmt.Errorf("test %d 'host' must be set", i+1)
-		}
-		if test.TestType == "" {
-			return Config{}, fmt.Errorf("test %d 'testType' must be set", i+1)
-		}
+	if err := config.validate(); err != nil {
+		return Config{}, fmt.Errorf("validation issue: %w", err)
 	}
 
 	return config, nil
