@@ -16,7 +16,7 @@ var configFile string
 var runCmd = &cobra.Command{
 	Use:                   "run --config <path/to/config.yaml>",
 	DisableFlagsInUseLine: true,
-	Example:               "sherlock run --config path/to/config.yaml",
+	Example:               "sherlock dns run --config path/to/config.yaml",
 	Short:                 "Run DNS tests based on the provided configuration",
 	Long: `Run DNS tests for the hosts specified in the configuration file. The command will
 execute all tests defined in the config and only report errors at the end. This ensures that
@@ -46,8 +46,8 @@ func runTests() {
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
+	dnsCmd.AddCommand(runCmd)
 
-	runCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file (config/config.yaml)")
+	runCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "Path to the config file (config/config.yaml)")
 	runCmd.MarkPersistentFlagRequired("config")
 }
