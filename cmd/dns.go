@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -17,6 +19,7 @@ Examples:
   sherlock dns test --type a --host example.com --expected "10.0.0.100" --server 1.1.1.1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
+		os.Exit(1)
 	},
 }
 
