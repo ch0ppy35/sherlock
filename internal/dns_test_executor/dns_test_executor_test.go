@@ -18,14 +18,14 @@ import (
 func Test_RunAllTestsInConfig(t *testing.T) {
 	tests := []struct {
 		name          string
-		config        cfg.Config
+		config        cfg.DNSRecordsFullTestConfig
 		mockResponses map[uint16]*d.Msg
 		mockError     error
 		expectedError string
 	}{
 		{
 			name: "Valid configuration",
-			config: cfg.Config{
+			config: cfg.DNSRecordsFullTestConfig{
 				DNSServer: "8.8.8.8",
 				Tests: []cfg.DNSTestConfig{
 					{
@@ -46,7 +46,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 		},
 		{
 			name: "Configuration with missing records",
-			config: cfg.Config{
+			config: cfg.DNSRecordsFullTestConfig{
 				DNSServer: "8.8.8.8",
 				Tests: []cfg.DNSTestConfig{
 					{
@@ -67,7 +67,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 		},
 		{
 			name: "Configuration with query error",
-			config: cfg.Config{
+			config: cfg.DNSRecordsFullTestConfig{
 				DNSServer: "8.8.8.8",
 				Tests: []cfg.DNSTestConfig{
 					{
@@ -82,7 +82,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 		},
 		{
 			name: "Empty configuration",
-			config: cfg.Config{
+			config: cfg.DNSRecordsFullTestConfig{
 				DNSServer: "8.8.8.8",
 				Tests:     []cfg.DNSTestConfig{},
 			},
@@ -175,7 +175,7 @@ func Test_queryDNSForHost(t *testing.T) {
 				},
 			}
 
-			executor := NewDNSTestExecutor(cfg.Config{}, client)
+			executor := NewDNSTestExecutor(cfg.DNSRecordsFullTestConfig{}, client)
 			var wg sync.WaitGroup
 
 			wg.Add(1)

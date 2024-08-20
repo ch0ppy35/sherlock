@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
+type DNSRecordsFullTestConfig struct {
 	DNSServer string          `yaml:"dnsServer"` // Optional
 	Tests     []DNSTestConfig `yaml:"tests"`     // Required
 }
@@ -18,7 +18,7 @@ type DNSTestConfig struct {
 	TestType       string   `yaml:"testType"`       // Required
 }
 
-func (c *Config) validate() error {
+func (c *DNSRecordsFullTestConfig) validate() error {
 	if len(c.Tests) == 0 {
 		return fmt.Errorf("no tests defined in the configuration")
 	}
@@ -42,25 +42,25 @@ func (c *Config) validate() error {
 	return nil
 }
 
-func LoadConfig(configFile string) (Config, error) {
-	var config Config
+func LoadDNSRecordsFullTestConfig(configFile string) (DNSRecordsFullTestConfig, error) {
+	var config DNSRecordsFullTestConfig
 	if configFile == "" {
-		return Config{}, fmt.Errorf("no config file specified")
+		return DNSRecordsFullTestConfig{}, fmt.Errorf("no config file specified")
 	}
 
 	viper.SetConfigFile(configFile)
 	viper.SetConfigType("yaml")
 
 	if err := viper.ReadInConfig(); err != nil {
-		return Config{}, fmt.Errorf("error reading config file: %w", err)
+		return DNSRecordsFullTestConfig{}, fmt.Errorf("error reading config file: %w", err)
 	}
 
 	if err := viper.Unmarshal(&config); err != nil {
-		return Config{}, fmt.Errorf("unable to decode into struct: %w", err)
+		return DNSRecordsFullTestConfig{}, fmt.Errorf("unable to decode into struct: %w", err)
 	}
 
 	if err := config.validate(); err != nil {
-		return Config{}, fmt.Errorf("validation issue: %w", err)
+		return DNSRecordsFullTestConfig{}, fmt.Errorf("validation issue: %w", err)
 	}
 
 	return config, nil

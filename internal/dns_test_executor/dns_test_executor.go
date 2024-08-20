@@ -11,7 +11,7 @@ import (
 )
 
 type DNSTestExecutor struct {
-	Config    cfg.Config
+	Config    cfg.DNSRecordsFullTestConfig
 	Client    dns.IDNSClient
 	Results   map[string]*dns.DNSRecords
 	Errors    map[string]error
@@ -19,7 +19,7 @@ type DNSTestExecutor struct {
 	mu        sync.Mutex
 }
 
-func NewDNSTestExecutor(config cfg.Config, client dns.IDNSClient) *DNSTestExecutor {
+func NewDNSTestExecutor(config cfg.DNSRecordsFullTestConfig, client dns.IDNSClient) *DNSTestExecutor {
 	return &DNSTestExecutor{
 		Config:  config,
 		Client:  client,

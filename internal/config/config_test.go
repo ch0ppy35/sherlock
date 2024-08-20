@@ -9,13 +9,13 @@ func TestLoadConfig(t *testing.T) {
 	tests := []struct {
 		name        string
 		configFile  string
-		expected    Config
+		expected    DNSRecordsFullTestConfig
 		expectError bool
 	}{
 		{
 			name:       "Valid Config File",
-			configFile: "testdata/valid_config.yaml",
-			expected: Config{
+			configFile: "dnstestdata/valid_config.yaml",
+			expected: DNSRecordsFullTestConfig{
 				DNSServer: "8.8.8.8",
 				Tests: []DNSTestConfig{
 					{
@@ -39,13 +39,13 @@ func TestLoadConfig(t *testing.T) {
 		},
 		{
 			name:        "Missing Config File",
-			configFile:  "testdata/missing_config.yaml",
+			configFile:  "dnstestdata/missing_config.yaml",
 			expectError: true,
 		},
 		{
 			name:       "Missing DNS Server",
-			configFile: "testdata/missing_dns_server.yaml",
-			expected: Config{
+			configFile: "dnstestdata/missing_dns_server.yaml",
+			expected: DNSRecordsFullTestConfig{
 				DNSServer: "1.1.1.1", // Default DNS Server
 				Tests: []DNSTestConfig{
 					{
@@ -59,29 +59,29 @@ func TestLoadConfig(t *testing.T) {
 		},
 		{
 			name:        "No Tests Defined",
-			configFile:  "testdata/no_tests_defined.yaml",
+			configFile:  "dnstestdata/no_tests_defined.yaml",
 			expectError: true,
 		},
 		{
 			name:        "Missing Expected Values",
-			configFile:  "testdata/missing_expected_values.yaml",
+			configFile:  "dnstestdata/missing_expected_values.yaml",
 			expectError: true,
 		},
 		{
 			name:        "Missing Host",
-			configFile:  "testdata/missing_host.yaml",
+			configFile:  "dnstestdata/missing_host.yaml",
 			expectError: true,
 		},
 		{
 			name:        "Missing Test Type",
-			configFile:  "testdata/missing_test_type.yaml",
+			configFile:  "dnstestdata/missing_test_type.yaml",
 			expectError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config, err := LoadConfig(tt.configFile)
+			config, err := LoadDNSRecordsFullTestConfig(tt.configFile)
 
 			if tt.expectError {
 				if err == nil {

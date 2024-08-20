@@ -31,7 +31,7 @@ values and report any discrepancies after all tests are completed.`,
 }
 
 func runTests() {
-	config, err := cfg.LoadConfig(configFile)
+	config, err := cfg.LoadDNSRecordsFullTestConfig(configFile)
 	if err != nil {
 		ui.PrintMsgWithStatus("ERROR", "hiRed", "Trouble loading the config: %v\n", err)
 		os.Exit(1)
