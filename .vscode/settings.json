@@ -5,7 +5,9 @@
   "cSpell.words": [
     "buildx",
     "dnstest",
+    "dtexc",
     "goreleaser",
+    "IDNS",
     "miekg",
     "qtype",
     "stretchr"

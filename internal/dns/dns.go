@@ -22,15 +22,16 @@ type MXRecord struct {
 	Pref uint16
 }
 
-type TinyDNSClient interface {
+// Thinned down 'github.com/miekg/dns.client' implementation for easy testing
+type IDNSClient interface {
 	Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error)
 }
 
-type MockTinyDNSClient struct {
+type MockIDNSClient struct {
 	MockExchange func(*dns.Msg, string) (*dns.Msg, time.Duration, error)
 }
 
-func (m *MockTinyDNSClient) Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
+func (m *MockIDNSClient) Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
 	return m.MockExchange(msg, server)
 }
 
@@ -74,7 +75,7 @@ func (r *DNSRecords) addNSRecord(rr dns.RR) {
 }
 
 // QueryDNS fetches DNS records of various types for a given domain.
-func QueryDNS(domain string, dnsServer string, client TinyDNSClient) (*DNSRecords, error) {
+func QueryDNS(domain string, dnsServer string, client IDNSClient) (*DNSRecords, error) {
 	records := &DNSRecords{}
 	server := dnsServer + ":53"
 
@@ -98,7 +99,7 @@ func QueryDNS(domain string, dnsServer string, client TinyDNSClient) (*DNSRecord
 }
 
 // QueryDNSRecord queries a specific DNS record type and processes the results using a setter function.
-func QueryDNSRecord(client TinyDNSClient, domain string, server string, qtype uint16, setter func(dns.RR)) error {
+func QueryDNSRecord(client IDNSClient, domain string, server string, qtype uint16, setter func(dns.RR)) error {
 	msg := new(dns.Msg)
 	msg.SetQuestion(dns.Fqdn(domain), qtype)
 	resp, _, err := client.Exchange(msg, server)
@@ -114,7 +115,7 @@ func QueryDNSRecord(client TinyDNSClient, domain string, server string, qtype ui
 }
 
 // QueryAndExtract handles the DNS query and extracts the relevant records.
-func QueryAndExtract(client TinyDNSClient, testType, dnsServer, domain string) ([]string, error) {
+func QueryAndExtract(client IDNSClient, testType, dnsServer, domain string) ([]string, error) {
 	qtype, err := GetQueryType(testType)
 	if err != nil {
 		return nil, err

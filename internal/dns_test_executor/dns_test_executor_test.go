@@ -1,4 +1,4 @@
-package test_executor
+package dns_test_executor
 
 import (
 	"fmt"
@@ -92,7 +92,7 @@ func Test_RunAllTestsInConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := &dns.MockTinyDNSClient{
+			client := &dns.MockIDNSClient{
 				MockExchange: func(msg *d.Msg, server string) (*d.Msg, time.Duration, error) {
 					if tt.mockError != nil {
 						return nil, 0, tt.mockError
@@ -163,7 +163,7 @@ func Test_queryDNSForHost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := &dns.MockTinyDNSClient{
+			client := &dns.MockIDNSClient{
 				MockExchange: func(msg *d.Msg, server string) (*d.Msg, time.Duration, error) {
 					if tt.mockError != nil {
 						return nil, 0, tt.mockError

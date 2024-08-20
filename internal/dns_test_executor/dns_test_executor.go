@@ -1,4 +1,4 @@
-package test_executor
+package dns_test_executor
 
 import (
 	"fmt"
@@ -12,14 +12,14 @@ import (
 
 type DNSTestExecutor struct {
 	Config    cfg.Config
-	Client    dns.TinyDNSClient
+	Client    dns.IDNSClient
 	Results   map[string]*dns.DNSRecords
 	Errors    map[string]error
 	AllErrors []error
 	mu        sync.Mutex
 }
 
-func NewDNSTestExecutor(config cfg.Config, client dns.TinyDNSClient) *DNSTestExecutor {
+func NewDNSTestExecutor(config cfg.Config, client dns.IDNSClient) *DNSTestExecutor {
 	return &DNSTestExecutor{
 		Config:  config,
 		Client:  client,

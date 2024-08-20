@@ -64,7 +64,7 @@ func TestQueryDNSRecord(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := &MockTinyDNSClient{
+			client := &MockIDNSClient{
 				MockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
 					if tt.mockError != nil {
 						return nil, 0, tt.mockError
@@ -203,7 +203,7 @@ func TestQueryDNS(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := &MockTinyDNSClient{
+			client := &MockIDNSClient{
 				MockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
 					if tt.mockError != nil {
 						return nil, 0, tt.mockError
@@ -299,7 +299,7 @@ func TestQueryAndExtract(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := &MockTinyDNSClient{
+			client := &MockIDNSClient{
 				MockExchange: func(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error) {
 					if tt.mockError != nil {
 						return nil, 0, tt.mockError
