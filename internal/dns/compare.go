@@ -37,60 +37,46 @@ func CompareRecords(expected []string, actual []string) error {
 		}
 	}
 
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.SetStyle(table.StyleRounded)
-
-	if len(matchedRecords) > 0 {
-		t.AppendHeader(table.Row{"Type", "Record"})
-		t.AppendRows([]table.Row{
-			{"Matched", ""},
-		})
-		for _, record := range matchedRecords {
-			t.AppendRows([]table.Row{
-				{"", record},
-			})
-		}
-	} else {
-		t.AppendHeader(table.Row{"Type", "Record"})
-		t.AppendRows([]table.Row{
-			{"Matched", "None Found"},
-		})
-	}
-
-	if len(unexpectedRecords) > 0 {
-		t.AppendRows([]table.Row{
-			{"Unexpected", ""},
-		})
-		for _, record := range unexpectedRecords {
-			t.AppendRows([]table.Row{
-				{"", record},
-			})
-		}
-	} else {
-		t.AppendRows([]table.Row{
-			{"Unexpected", "None"},
-		})
-	}
-
-	if len(missingRecords) > 0 {
-		t.AppendRows([]table.Row{
-			{"Missing", ""},
-		})
-		for _, record := range missingRecords {
-			t.AppendRows([]table.Row{
-				{"", record},
-			})
-		}
-	} else {
-		t.AppendRows([]table.Row{
-			{"Missing", "None"},
-		})
-	}
-	t.Render()
+	printDNSComparisonTable(matchedRecords, unexpectedRecords, missingRecords)
 
 	if len(unexpectedRecords) > 0 || len(missingRecords) > 0 {
 		return fmt.Errorf("mismatched records found")
 	}
 	return nil
+}
+
+func printDNSComparisonTable(matched, unexpected, missing []string) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleRounded)
+	t.AppendHeader(table.Row{"Type", "Record"})
+
+	if len(matched) > 0 {
+		t.AppendRows([]table.Row{{"Matched", ""}})
+		for _, record := range matched {
+			t.AppendRows([]table.Row{{"", record}})
+		}
+	} else {
+		t.AppendRows([]table.Row{{"Matched", "None Found"}})
+	}
+
+	if len(unexpected) > 0 {
+		t.AppendRows([]table.Row{{"Unexpected", ""}})
+		for _, record := range unexpected {
+			t.AppendRows([]table.Row{{"", record}})
+		}
+	} else {
+		t.AppendRows([]table.Row{{"Unexpected", "None"}})
+	}
+
+	if len(missing) > 0 {
+		t.AppendRows([]table.Row{{"Missing", ""}})
+		for _, record := range missing {
+			t.AppendRows([]table.Row{{"", record}})
+		}
+	} else {
+		t.AppendRows([]table.Row{{"Missing", "None"}})
+	}
+
+	t.Render()
 }
