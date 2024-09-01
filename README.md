@@ -35,11 +35,11 @@ tests:
 ### Running Tests
 
 ```bash
-sherlock run --config path/to/config.yaml
+sherlock dns run --config path/to/config.yaml
 
 # or
 
-sherlock test --server 1.1.1.1 --host prom.example.com --expected "10.0.0.1" --type a
+sherlock dns test --server 1.1.1.1 --host prom.example.com --expected "10.0.0.1" --type a
 ```
 
 ### Docker
@@ -49,14 +49,14 @@ Alternatively, you can run Sherlock inside a Docker container
 ```bash
 docker run --rm -it \
   -v "$(pwd)/config:/app/config" \
-  ghcr.io/ch0ppy35/sherlock:v0.5.0 \
-  run --config /app/config/config.yaml
+  ghcr.io/ch0ppy35/sherlock:v0.5.2 \
+  dns run --config /app/config/config.yaml
 
 # or
 
 docker run --rm -it \
-  ghcr.io/ch0ppy35/sherlock:v0.5.0 \
-  test --server 1.1.1.1 \
+  ghcr.io/ch0ppy35/sherlock:v0.5.2 \
+  dns test --server 1.1.1.1 \
        --host prom.example.com \
        --expected "10.0.0.1" \
        --type a

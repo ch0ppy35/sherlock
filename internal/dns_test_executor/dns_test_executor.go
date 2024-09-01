@@ -2,7 +2,6 @@ package dns_test_executor
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
@@ -88,7 +87,7 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 	for _, test := range tests {
 		ui.PrintDashes()
 		fmt.Printf("Testing '%s' records\n", test.TestType)
-		actualValues := e.getDNSRecords(test.TestType, records)
+		actualValues := dns.ExtractRecords(records, test.TestType)
 		if actualValues == nil {
 			fmt.Printf("Unknown test type encountered: %s for host: %s\n", test.TestType, host)
 			e.AllErrors = append(e.AllErrors, fmt.Errorf("unknown test type: %s", test.TestType))
@@ -105,48 +104,5 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 		} else {
 			ui.PrintMsgWithStatus("GOOD", "green", "All records match the configuration\n")
 		}
-	}
-}
-
-// getDNSRecords returns the relevant DNS records based on the test type.
-func (e *DNSTestExecutor) getDNSRecords(testType string, records *dns.DNSRecords) []string {
-	switch strings.ToLower(testType) {
-	case "a":
-		if len(records.ARecords) == 0 {
-			return []string{}
-		}
-		return records.ARecords
-	case "aaaa":
-		if len(records.AAAARecords) == 0 {
-			return []string{}
-		}
-		return records.AAAARecords
-	case "cname":
-		if len(records.CNAMERecords) == 0 {
-			return []string{}
-		}
-		return records.CNAMERecords
-	case "mx":
-		var mxRecords []string
-		for _, mx := range records.MXRecords {
-			mxRecords = append(mxRecords, fmt.Sprintf("%s %d", mx.Host, mx.Pref))
-		}
-		if len(mxRecords) == 0 {
-			return []string{}
-		}
-		return mxRecords
-	case "txt":
-		if len(records.TXTRecords) == 0 {
-			return []string{}
-		}
-		return records.TXTRecords
-	case "ns":
-		if len(records.NSRecords) == 0 {
-			return []string{}
-		}
-		return records.NSRecords
-	default:
-		fmt.Printf("Unhandled test type: %s\n", testType)
-		return nil
 	}
 }

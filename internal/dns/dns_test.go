@@ -404,7 +404,7 @@ func TestGetQueryType(t *testing.T) {
 func TestExtractRecords(t *testing.T) {
 	type args struct {
 		records *DNSRecords
-		qtype   uint16
+		qtype   interface{}
 	}
 	tests := []struct {
 		name string
@@ -412,7 +412,7 @@ func TestExtractRecords(t *testing.T) {
 		want []string
 	}{
 		{
-			name: "Extract A records",
+			name: "Extract A records (uint16)",
 			args: args{
 				records: &DNSRecords{
 					ARecords: []string{"10.0.0.1"},
@@ -422,7 +422,17 @@ func TestExtractRecords(t *testing.T) {
 			want: []string{"10.0.0.1"},
 		},
 		{
-			name: "Extract AAAA records",
+			name: "Extract A records (string)",
+			args: args{
+				records: &DNSRecords{
+					ARecords: []string{"10.0.0.1"},
+				},
+				qtype: "A",
+			},
+			want: []string{"10.0.0.1"},
+		},
+		{
+			name: "Extract AAAA records (uint16)",
 			args: args{
 				records: &DNSRecords{
 					AAAARecords: []string{"2001:db8::1"},
@@ -432,7 +442,17 @@ func TestExtractRecords(t *testing.T) {
 			want: []string{"2001:db8::1"},
 		},
 		{
-			name: "Extract CNAME records",
+			name: "Extract AAAA records (string)",
+			args: args{
+				records: &DNSRecords{
+					AAAARecords: []string{"2001:db8::1"},
+				},
+				qtype: "AAAA",
+			},
+			want: []string{"2001:db8::1"},
+		},
+		{
+			name: "Extract CNAME records (uint16)",
 			args: args{
 				records: &DNSRecords{
 					CNAMERecords: []string{"example.com."},
@@ -442,7 +462,17 @@ func TestExtractRecords(t *testing.T) {
 			want: []string{"example.com."},
 		},
 		{
-			name: "Extract MX records",
+			name: "Extract CNAME records (string)",
+			args: args{
+				records: &DNSRecords{
+					CNAMERecords: []string{"example.com."},
+				},
+				qtype: "CNAME",
+			},
+			want: []string{"example.com."},
+		},
+		{
+			name: "Extract MX records (uint16)",
 			args: args{
 				records: &DNSRecords{
 					MXRecords: []MXRecord{
@@ -454,7 +484,19 @@ func TestExtractRecords(t *testing.T) {
 			want: []string{"mail.example.com."},
 		},
 		{
-			name: "Extract TXT records",
+			name: "Extract MX records (string)",
+			args: args{
+				records: &DNSRecords{
+					MXRecords: []MXRecord{
+						{Host: "mail.example.com.", Pref: 10},
+					},
+				},
+				qtype: "MX",
+			},
+			want: []string{"mail.example.com."},
+		},
+		{
+			name: "Extract TXT records (uint16)",
 			args: args{
 				records: &DNSRecords{
 					TXTRecords: []string{"v=spf1 include:_spf.example.com ~all"},
@@ -464,7 +506,17 @@ func TestExtractRecords(t *testing.T) {
 			want: []string{"v=spf1 include:_spf.example.com ~all"},
 		},
 		{
-			name: "Extract NS records",
+			name: "Extract TXT records (string)",
+			args: args{
+				records: &DNSRecords{
+					TXTRecords: []string{"v=spf1 include:_spf.example.com ~all"},
+				},
+				qtype: "TXT",
+			},
+			want: []string{"v=spf1 include:_spf.example.com ~all"},
+		},
+		{
+			name: "Extract NS records (uint16)",
 			args: args{
 				records: &DNSRecords{
 					NSRecords: []string{"ns1.example.com."},
@@ -474,12 +526,38 @@ func TestExtractRecords(t *testing.T) {
 			want: []string{"ns1.example.com."},
 		},
 		{
+			name: "Extract NS records (string)",
+			args: args{
+				records: &DNSRecords{
+					NSRecords: []string{"ns1.example.com."},
+				},
+				qtype: "NS",
+			},
+			want: []string{"ns1.example.com."},
+		},
+		{
 			name: "Record type not found",
 			args: args{
 				records: &DNSRecords{},
-				qtype:   0,
+				qtype:   dns.TypeA,
 			},
-			want: []string{},
+			want: nil,
+		},
+		{
+			name: "Unsupported query type (int)",
+			args: args{
+				records: &DNSRecords{},
+				qtype:   123,
+			},
+			want: nil,
+		},
+		{
+			name: "Invalid DNS query type (string)",
+			args: args{
+				records: &DNSRecords{},
+				qtype:   "invalidtype",
+			},
+			want: nil,
 		},
 	}
 	for _, tt := range tests {

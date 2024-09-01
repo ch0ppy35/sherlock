@@ -39,7 +39,6 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
-          # either 'goreleaser' or 'goreleaser-pro'
           distribution: goreleaser
           version: "~> v2"
           args: release --clean

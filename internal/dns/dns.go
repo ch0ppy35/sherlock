@@ -155,8 +155,25 @@ func GetQueryType(testType string) (uint16, error) {
 }
 
 // ExtractRecords extracts records from the DNS query results based on the query type.
-func ExtractRecords(records *DNSRecords, qtype uint16) []string {
-	switch qtype {
+func ExtractRecords(records *DNSRecords, qtype interface{}) []string {
+	var queryType uint16
+
+	switch v := qtype.(type) {
+	case string:
+		var err error
+		queryType, err = GetQueryType(v)
+		if err != nil {
+			fmt.Printf("Invalid DNS query type: %s\n", v)
+			return nil
+		}
+	case uint16:
+		queryType = v
+	default:
+		fmt.Printf("Unsupported query type: %v\n", v)
+		return nil
+	}
+
+	switch queryType {
 	case dns.TypeA:
 		return records.ARecords
 	case dns.TypeAAAA:
@@ -174,6 +191,6 @@ func ExtractRecords(records *DNSRecords, qtype uint16) []string {
 	case dns.TypeNS:
 		return records.NSRecords
 	default:
-		return []string{}
+		return nil
 	}
 }
