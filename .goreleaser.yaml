@@ -14,7 +14,10 @@ builds:
       - darwin
     goarch:
       - amd64
+      - arm
       - arm64
+    goarm:
+      - "7"
     ldflags: 
       - "-s -w -X main.version={{.Version}}"
       - "-X github.com/ch0ppy35/sherlock/cmd.arch={{.Arch}}"
@@ -53,6 +56,16 @@ dockers:
     goarch: amd64
     goos: linux
   - image_templates:
+      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-armv7"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm/v7"
+    dockerfile: "Dockerfile.release"
+    goarch: arm
+    goarm: "7"
+    goos: linux
+  - image_templates:
       - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-arm64"
     use: buildx
     build_flag_templates:
@@ -66,6 +79,7 @@ docker_manifests:
   - name_template: "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}"
     image_templates:
       - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-amd64"
+      - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-armv7"
       - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-arm64"
 
 release:
