@@ -24,6 +24,7 @@ builds:
       - "-X github.com/ch0ppy35/sherlock/cmd.commit={{.Commit}}"
       - "-X github.com/ch0ppy35/sherlock/cmd.date={{.Date}}"
       - "-X github.com/ch0ppy35/sherlock/cmd.version={{.Version}}"
+      - "-X github.com/ch0ppy35/sherlock/cmd.goversion={{.Env.GOVERSION}}"
 
 archives:
   - format: tar.gz

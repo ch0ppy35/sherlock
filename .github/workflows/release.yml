@@ -7,6 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  GOVERSION: 1.22.6
 
 permissions:
   contents: write
@@ -33,7 +34,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22.6'
+          go-version: ${{ env.GOVERSION }}
+      - name: Get Go Version
+        id: goversion
+        run: echo "GOVERSION_FROM_BIN=$(go version | awk '{print $3}')" >> $GITHUB_ENV
       - name: Run Tests
         run: go test ./... -cover
       - name: Run GoReleaser
@@ -44,3 +48,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOVERSION: ${{ env.GOVERSION_FROM_BIN }}

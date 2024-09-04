@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	arch    = ""
-	version = "dev"
-	commit  = "N/A"
-	date    = "NOW"
+	arch      = "N/A"
+	version   = "dev"
+	commit    = "N/A"
+	date      = "NOW"
+	goversion = "N/A"
 )
 
 // versionCmd represents the version command
@@ -33,10 +34,11 @@ func printVersionInfo() {
 
 	t.SetTitle("Sherlock Info")
 	t.AppendRows([]table.Row{
-		{"App Version", version},
+		{"Version", version},
+		{"Revision", commit},
 		{"Arch", arch},
-		{"Commit", commit},
-		{"Build Time", date},
+		{"BuildTime", date},
+		{"BuildGoVersion", goversion},
 	})
 	t.Render()
 }
