@@ -402,18 +402,18 @@ func TestGetQueryType(t *testing.T) {
 }
 
 func TestExtractRecords(t *testing.T) {
-	type args struct {
+	type args[T uint16 | string] struct {
 		records *DNSRecords
-		qtype   interface{}
+		qtype   T
 	}
 	tests := []struct {
 		name string
-		args args
+		args any
 		want []string
 	}{
 		{
 			name: "Extract A records (uint16)",
-			args: args{
+			args: args[uint16]{
 				records: &DNSRecords{
 					ARecords: []string{"10.0.0.1"},
 				},
@@ -423,7 +423,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract A records (string)",
-			args: args{
+			args: args[string]{
 				records: &DNSRecords{
 					ARecords: []string{"10.0.0.1"},
 				},
@@ -433,7 +433,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract AAAA records (uint16)",
-			args: args{
+			args: args[uint16]{
 				records: &DNSRecords{
 					AAAARecords: []string{"2001:db8::1"},
 				},
@@ -443,7 +443,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract AAAA records (string)",
-			args: args{
+			args: args[string]{
 				records: &DNSRecords{
 					AAAARecords: []string{"2001:db8::1"},
 				},
@@ -453,7 +453,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract CNAME records (uint16)",
-			args: args{
+			args: args[uint16]{
 				records: &DNSRecords{
 					CNAMERecords: []string{"example.com."},
 				},
@@ -463,7 +463,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract CNAME records (string)",
-			args: args{
+			args: args[string]{
 				records: &DNSRecords{
 					CNAMERecords: []string{"example.com."},
 				},
@@ -473,7 +473,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract MX records (uint16)",
-			args: args{
+			args: args[uint16]{
 				records: &DNSRecords{
 					MXRecords: []MXRecord{
 						{Host: "mail.example.com.", Pref: 10},
@@ -485,7 +485,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract MX records (string)",
-			args: args{
+			args: args[string]{
 				records: &DNSRecords{
 					MXRecords: []MXRecord{
 						{Host: "mail.example.com.", Pref: 10},
@@ -497,7 +497,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract TXT records (uint16)",
-			args: args{
+			args: args[uint16]{
 				records: &DNSRecords{
 					TXTRecords: []string{"v=spf1 include:_spf.example.com ~all"},
 				},
@@ -507,7 +507,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract TXT records (string)",
-			args: args{
+			args: args[string]{
 				records: &DNSRecords{
 					TXTRecords: []string{"v=spf1 include:_spf.example.com ~all"},
 				},
@@ -517,7 +517,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract NS records (uint16)",
-			args: args{
+			args: args[uint16]{
 				records: &DNSRecords{
 					NSRecords: []string{"ns1.example.com."},
 				},
@@ -527,7 +527,7 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Extract NS records (string)",
-			args: args{
+			args: args[string]{
 				records: &DNSRecords{
 					NSRecords: []string{"ns1.example.com."},
 				},
@@ -537,33 +537,119 @@ func TestExtractRecords(t *testing.T) {
 		},
 		{
 			name: "Record type not found",
-			args: args{
+			args: args[uint16]{
 				records: &DNSRecords{},
 				qtype:   dns.TypeA,
 			},
 			want: nil,
 		},
 		{
-			name: "Unsupported query type (int)",
-			args: args{
+			name: "Unsupported query type (invalid uint16)",
+			args: args[uint16]{
 				records: &DNSRecords{},
-				qtype:   123,
+				qtype:   9999, // Invalid uint16 type
 			},
 			want: nil,
 		},
 		{
 			name: "Invalid DNS query type (string)",
-			args: args{
+			args: args[string]{
 				records: &DNSRecords{},
-				qtype:   "invalidtype",
+				qtype:   "invalidtype", // Invalid string type
 			},
 			want: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ExtractRecords(tt.args.records, tt.args.qtype); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ExtractRecords() = %v, want %v", got, tt.want)
+			switch v := tt.args.(type) {
+			case args[uint16]:
+				got := ExtractRecords(v.records, v.qtype)
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("ExtractRecords() = %v, want %v", got, tt.want)
+				}
+			case args[string]:
+				got := ExtractRecords(v.records, v.qtype)
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("ExtractRecords() = %v, want %v", got, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestResolveQueryType(t *testing.T) {
+	type args[T uint16 | string] struct {
+		qtype T
+	}
+	tests := []struct {
+		name    string
+		args    any
+		want    uint16
+		wantErr bool
+	}{
+		{
+			name: "Valid query type (string A)",
+			args: args[string]{
+				qtype: "A",
+			},
+			want:    dns.TypeA,
+			wantErr: false,
+		},
+		{
+			name: "Valid query type (string AAAA)",
+			args: args[string]{
+				qtype: "AAAA",
+			},
+			want:    dns.TypeAAAA,
+			wantErr: false,
+		},
+		{
+			name: "Valid query type (uint16 A)",
+			args: args[uint16]{
+				qtype: dns.TypeA,
+			},
+			want:    dns.TypeA,
+			wantErr: false,
+		},
+		{
+			name: "Invalid query type (invalid string)",
+			args: args[string]{
+				qtype: "invalidtype",
+			},
+			want:    0,
+			wantErr: true,
+		},
+		{
+			name: "Unsupported query type (invalid uint16)",
+			args: args[uint16]{
+				qtype: 9999, // Invalid uint16 type
+			},
+			want:    9999,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			switch v := tt.args.(type) {
+			case args[string]:
+				got, err := resolveQueryType(v.qtype)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("resolveQueryType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if got != tt.want {
+					t.Errorf("resolveQueryType() = %v, want %v", got, tt.want)
+				}
+			case args[uint16]:
+				got, err := resolveQueryType(v.qtype)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("resolveQueryType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if got != tt.want {
+					t.Errorf("resolveQueryType() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}
