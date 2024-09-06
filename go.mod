@@ -1,6 +1,6 @@
 module github.com/ch0ppy35/sherlock
 
-go 1.22.6
+go 1.23.0
 
 require (
 	github.com/fatih/color v1.17.0
