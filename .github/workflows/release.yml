@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  GOVERSION: 1.23.0
+  GOVERSION: 1.23.1
 
 permissions:
   contents: write
