@@ -49,13 +49,13 @@ Alternatively, you can run Sherlock inside a Docker container
 ```bash
 docker run --rm -it \
   -v "$(pwd)/config:/app/config" \
-  ghcr.io/ch0ppy35/sherlock:v0.5.2 \
+  ghcr.io/ch0ppy35/sherlock:v0.5.4 \
   dns run --config /app/config/config.yaml
 
 # or
 
 docker run --rm -it \
-  ghcr.io/ch0ppy35/sherlock:v0.5.2 \
+  ghcr.io/ch0ppy35/sherlock:v0.5.4 \
   dns test --server 1.1.1.1 \
        --host prom.example.com \
        --expected "10.0.0.1" \
