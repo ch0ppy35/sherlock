@@ -19,7 +19,7 @@ builds:
     goarm:
       - "7"
     ldflags: 
-      - "-s -w -X main.version={{.Version}}"
+      - "-s -w"
       - "-X github.com/ch0ppy35/sherlock/cmd.arch={{.Arch}}"
       - "-X github.com/ch0ppy35/sherlock/cmd.commit={{.Commit}}"
       - "-X github.com/ch0ppy35/sherlock/cmd.date={{.Date}}"

@@ -1,5 +1,3 @@
-// File: ui/ui_test.go
-
 package ui
 
 import (
@@ -85,7 +83,6 @@ func TestPrintMsgWithStatus(t *testing.T) {
 	}
 }
 
-// Utility function to capture output
 func captureOutput(f func()) string {
 	r, w, _ := os.Pipe()
 	stdout := os.Stdout

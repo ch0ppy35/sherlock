@@ -46,7 +46,7 @@ func TestLoadConfig(t *testing.T) {
 			name:       "Missing DNS Server",
 			configFile: "dnstestdata/missing_dns_server.yaml",
 			expected: DNSRecordsFullTestConfig{
-				DNSServer: "1.1.1.1", // Default DNS Server
+				DNSServer: "1.1.1.1",
 				Tests: []DNSTestConfig{
 					{
 						ExpectedValues: []string{"1.1.1.1"},

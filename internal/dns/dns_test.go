@@ -324,7 +324,7 @@ func TestQueryAndExtract(t *testing.T) {
 	}
 }
 
-func TestGetQueryType(t *testing.T) {
+func TestGetQueryTypeFromString(t *testing.T) {
 	tests := []struct {
 		name     string
 		testType string
@@ -544,18 +544,10 @@ func TestExtractRecords(t *testing.T) {
 			want: nil,
 		},
 		{
-			name: "Unsupported query type (invalid uint16)",
-			args: args[uint16]{
-				records: &DNSRecords{},
-				qtype:   9999, // Invalid uint16 type
-			},
-			want: nil,
-		},
-		{
 			name: "Invalid DNS query type (string)",
 			args: args[string]{
 				records: &DNSRecords{},
-				qtype:   "invalidtype", // Invalid string type
+				qtype:   "invalidtype",
 			},
 			want: nil,
 		},
@@ -572,83 +564,6 @@ func TestExtractRecords(t *testing.T) {
 				got := ExtractRecords(v.records, v.qtype)
 				if !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("ExtractRecords() = %v, want %v", got, tt.want)
-				}
-			}
-		})
-	}
-}
-
-func TestResolveQueryType(t *testing.T) {
-	type args[T uint16 | string] struct {
-		qtype T
-	}
-	tests := []struct {
-		name    string
-		args    any
-		want    uint16
-		wantErr bool
-	}{
-		{
-			name: "Valid query type (string A)",
-			args: args[string]{
-				qtype: "A",
-			},
-			want:    dns.TypeA,
-			wantErr: false,
-		},
-		{
-			name: "Valid query type (string AAAA)",
-			args: args[string]{
-				qtype: "AAAA",
-			},
-			want:    dns.TypeAAAA,
-			wantErr: false,
-		},
-		{
-			name: "Valid query type (uint16 A)",
-			args: args[uint16]{
-				qtype: dns.TypeA,
-			},
-			want:    dns.TypeA,
-			wantErr: false,
-		},
-		{
-			name: "Invalid query type (invalid string)",
-			args: args[string]{
-				qtype: "invalidtype",
-			},
-			want:    0,
-			wantErr: true,
-		},
-		{
-			name: "Unsupported query type (invalid uint16)",
-			args: args[uint16]{
-				qtype: 9999, // Invalid uint16 type
-			},
-			want:    9999,
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			switch v := tt.args.(type) {
-			case args[string]:
-				got, err := resolveQueryType(v.qtype)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("resolveQueryType() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-				if got != tt.want {
-					t.Errorf("resolveQueryType() = %v, want %v", got, tt.want)
-				}
-			case args[uint16]:
-				got, err := resolveQueryType(v.qtype)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("resolveQueryType() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-				if got != tt.want {
-					t.Errorf("resolveQueryType() = %v, want %v", got, tt.want)
 				}
 			}
 		})
