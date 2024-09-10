@@ -1,18 +1,16 @@
 # Sherlock
 
-A CLI tool for testing DNS records.
+Simple Infrastructure Sanity Checks
 
 ## Overview
 
-Sherlock is a command-line tool designed to perform DNS record tests based on a specified configuration file or individual params. It allows you to run various types of DNS checks, such as verifying A, AAAA, CNAME, MX, TXT, and NS records.
+Sherlock is a cli tool designed for simple infrastructure sanity checks. Currently it allows you to perform DNS record tests using a YAML configuration file or individual parameters, verifying records such as A, AAAA, CNAME, MX, TXT, and NS.
 
-This tool supports a configuration file in YAML format where you can define the expected DNS records for different hosts. The 'run' command executes all tests defined in the configuration and provides a summary of any discrepancies found. Alternatively, you can use the 'test' command to query a DNS server for a specific record type and compare the results with expected values directly from the command line.
-
-This tool is generally intended to be used within a container, making it ideal for integration into CI/CD pipelines or scheduled tasks like cron jobs running in Kubernetes. Binaries are also provided in the GitHub release, or you can build the binary locally using the `make` command.
+In addition to DNS tests more capabilities will be added in the future, including SFTP testing. Sherlock is intended for use within containers for CI/CD pipelines or cronjobs in Kubernetes. Binaries are available in the GitHub release, or you can build the binary locally with the `make` command.
 
 See `sherlock -h` for more info
 
-## Usage
+## DNS Testing Usage
 
 ### Config File
 
@@ -37,7 +35,7 @@ tests:
 ```bash
 sherlock dns run --config path/to/config.yaml
 
-# or
+# or without a config file
 
 sherlock dns test --server 1.1.1.1 --host prom.example.com --expected "10.0.0.1" --type a
 ```
@@ -60,5 +58,4 @@ docker run --rm -it \
        --host prom.example.com \
        --expected "10.0.0.1" \
        --type a
-
 ```
