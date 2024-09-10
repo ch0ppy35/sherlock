@@ -3,11 +3,15 @@
     "https://json.schemastore.org/yamllint.json": ["config/config*.yaml"]
   },
   "cSpell.words": [
+    "armv",
     "buildx",
     "dnstest",
     "dtexc",
+    "goarch",
+    "goarm",
     "goreleaser",
     "IDNS",
+    "ldflags",
     "miekg",
     "qtype",
     "stretchr"

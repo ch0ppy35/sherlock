@@ -1,10 +1,11 @@
 .PHONY: build
 build:
-	go build -ldflags "-X github.com/ch0ppy35/sherlock/cmd.version=LOCALBUILD \
+	go build -ldflags \
+	"-X github.com/ch0ppy35/sherlock/cmd.version=LOCALBUILD \
 	-X github.com/ch0ppy35/sherlock/cmd.commit=mainline \
 	-X github.com/ch0ppy35/sherlock/cmd.date=$$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
 	-X github.com/ch0ppy35/sherlock/cmd.arch=$$(go env GOARCH) \
-	-X github.com/ch0ppy35/sherlock/cmd.goversion=$$(go version | awk '{print $$3}')" \
+	-X github.com/ch0ppy35/sherlock/cmd.goversion=$$(go env GOVERSION)" \
 	-o bin/sherlock .
 
 .PHONY: clean
@@ -23,3 +24,7 @@ docker-build:
 .PHONY: test
 test:
 	go test ./... -cover
+
+.PHONY: vet 
+vet:
+	go vet ./...

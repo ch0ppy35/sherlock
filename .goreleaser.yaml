@@ -28,7 +28,6 @@ builds:
 
 archives:
   - format: tar.gz
-    # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -84,8 +83,4 @@ docker_manifests:
       - "ghcr.io/ch0ppy35/sherlock:{{ .Tag }}-arm64"
 
 release:
-  # If set to auto, will mark the release as not ready for production
-  # in case there is an indicator for this in the tag e.g. v1.0.0-rc1
-  # If set to true, will mark the release as not ready for production.
-  # Default: false.
   prerelease: auto

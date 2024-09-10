@@ -87,10 +87,11 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 	for _, test := range tests {
 		ui.PrintDashes()
 		fmt.Printf("Testing '%s' records\n", test.TestType)
-		actualValues := dns.ExtractRecords(records, test.TestType)
-		if actualValues == nil {
-			fmt.Printf("Unknown test type encountered: %s for host: %s\n", test.TestType, host)
-			e.AllErrors = append(e.AllErrors, fmt.Errorf("unknown test type: %s", test.TestType))
+
+		actualValues, err := dns.ExtractRecords(records, test.TestType)
+		if err != nil {
+			fmt.Printf("Error extracting records for test type: %s on host: %s, error: %v\n", test.TestType, host, err)
+			e.AllErrors = append(e.AllErrors, fmt.Errorf("failed to extract records for test type %s on host %s: %w", test.TestType, host, err))
 			continue
 		}
 

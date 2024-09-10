@@ -317,6 +317,10 @@ func TestQueryAndExtract(t *testing.T) {
 				return
 			}
 
+			if len(got) == 0 && len(tt.expected) == 0 {
+				return
+			}
+
 			if !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("QueryAndExtract() = %v, expected %v", got, tt.expected)
 			}
@@ -407,9 +411,11 @@ func TestExtractRecords(t *testing.T) {
 		qtype   T
 	}
 	tests := []struct {
-		name string
-		args any
-		want []string
+		name    string
+		args    interface{}
+		want    []string
+		wantErr bool
+		errMsg  string
 	}{
 		{
 			name: "Extract A records (uint16)",
@@ -419,7 +425,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: dns.TypeA,
 			},
-			want: []string{"10.0.0.1"},
+			want:    []string{"10.0.0.1"},
+			wantErr: false,
 		},
 		{
 			name: "Extract A records (string)",
@@ -429,7 +436,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: "A",
 			},
-			want: []string{"10.0.0.1"},
+			want:    []string{"10.0.0.1"},
+			wantErr: false,
 		},
 		{
 			name: "Extract AAAA records (uint16)",
@@ -439,7 +447,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: dns.TypeAAAA,
 			},
-			want: []string{"2001:db8::1"},
+			want:    []string{"2001:db8::1"},
+			wantErr: false,
 		},
 		{
 			name: "Extract AAAA records (string)",
@@ -449,7 +458,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: "AAAA",
 			},
-			want: []string{"2001:db8::1"},
+			want:    []string{"2001:db8::1"},
+			wantErr: false,
 		},
 		{
 			name: "Extract CNAME records (uint16)",
@@ -459,7 +469,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: dns.TypeCNAME,
 			},
-			want: []string{"example.com."},
+			want:    []string{"example.com."},
+			wantErr: false,
 		},
 		{
 			name: "Extract CNAME records (string)",
@@ -469,7 +480,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: "CNAME",
 			},
-			want: []string{"example.com."},
+			want:    []string{"example.com."},
+			wantErr: false,
 		},
 		{
 			name: "Extract MX records (uint16)",
@@ -481,7 +493,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: dns.TypeMX,
 			},
-			want: []string{"mail.example.com."},
+			want:    []string{"mail.example.com."},
+			wantErr: false,
 		},
 		{
 			name: "Extract MX records (string)",
@@ -493,7 +506,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: "MX",
 			},
-			want: []string{"mail.example.com."},
+			want:    []string{"mail.example.com."},
+			wantErr: false,
 		},
 		{
 			name: "Extract TXT records (uint16)",
@@ -503,7 +517,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: dns.TypeTXT,
 			},
-			want: []string{"v=spf1 include:_spf.example.com ~all"},
+			want:    []string{"v=spf1 include:_spf.example.com ~all"},
+			wantErr: false,
 		},
 		{
 			name: "Extract TXT records (string)",
@@ -513,7 +528,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: "TXT",
 			},
-			want: []string{"v=spf1 include:_spf.example.com ~all"},
+			want:    []string{"v=spf1 include:_spf.example.com ~all"},
+			wantErr: false,
 		},
 		{
 			name: "Extract NS records (uint16)",
@@ -523,7 +539,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: dns.TypeNS,
 			},
-			want: []string{"ns1.example.com."},
+			want:    []string{"ns1.example.com."},
+			wantErr: false,
 		},
 		{
 			name: "Extract NS records (string)",
@@ -533,7 +550,8 @@ func TestExtractRecords(t *testing.T) {
 				},
 				qtype: "NS",
 			},
-			want: []string{"ns1.example.com."},
+			want:    []string{"ns1.example.com."},
+			wantErr: false,
 		},
 		{
 			name: "Record type not found",
@@ -541,7 +559,8 @@ func TestExtractRecords(t *testing.T) {
 				records: &DNSRecords{},
 				qtype:   dns.TypeA,
 			},
-			want: nil,
+			want:    nil,
+			wantErr: false,
 		},
 		{
 			name: "Invalid DNS query type (string)",
@@ -549,19 +568,34 @@ func TestExtractRecords(t *testing.T) {
 				records: &DNSRecords{},
 				qtype:   "invalidtype",
 			},
-			want: nil,
+			wantErr: true,
+			errMsg:  "something went wrong determining the query type: unsupported test type. Supported types: a, aaaa, cname, mx, txt, ns",
+			want:    []string{},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			switch v := tt.args.(type) {
 			case args[uint16]:
-				got := ExtractRecords(v.records, v.qtype)
+				got, err := ExtractRecords(v.records, v.qtype)
+				if (err != nil) != tt.wantErr { // Check if we expected an error
+					t.Errorf("ExtractRecords() error = %v, wantErr %v", err, tt.wantErr)
+				}
+				if err != nil && err.Error() != tt.errMsg { // Check the error message if it exists
+					t.Errorf("ExtractRecords() error message = %v, wantErrMessage %v", err.Error(), tt.errMsg)
+				}
 				if !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("ExtractRecords() = %v, want %v", got, tt.want)
 				}
 			case args[string]:
-				got := ExtractRecords(v.records, v.qtype)
+				got, err := ExtractRecords(v.records, v.qtype)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("ExtractRecords() error = %v, wantErr %v", err, tt.wantErr)
+				}
+				if err != nil && err.Error() != tt.errMsg {
+					t.Errorf("ExtractRecords() error message = %v, wantErrMessage %v", err.Error(), tt.errMsg)
+				}
 				if !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("ExtractRecords() = %v, want %v", got, tt.want)
 				}

@@ -118,17 +118,17 @@ func QueryDNSRecord(client IDNSClient, domain string, server string, qtype uint1
 func QueryAndExtract(client IDNSClient, testType, dnsServer, domain string) ([]string, error) {
 	qtype, err := GetQueryTypeFromString(testType)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid query type: %v", err)
 	}
 
 	records, err := QueryDNS(domain, dnsServer, client)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query DNS: %v", err)
 	}
 
-	result := ExtractRecords(records, qtype)
-	if result == nil {
-		return []string{}, nil
+	result, err := ExtractRecords(records, qtype)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract records: %v", err)
 	}
 
 	return result, nil
@@ -155,39 +155,39 @@ func GetQueryTypeFromString(testType string) (uint16, error) {
 }
 
 // ExtractRecords extracts records from the DNS query results based on the query type
-func ExtractRecords[T uint16 | string](records *DNSRecords, qtype T) []string {
+func ExtractRecords[T uint16 | string](records *DNSRecords, qtype T) ([]string, error) {
 	var queryType uint16
-	switch v := any(qtype).(type) {
+	switch qt := any(qtype).(type) {
 	case string:
-		resolvedType, err := GetQueryTypeFromString(v)
+		resolvedType, err := GetQueryTypeFromString(qt)
 		if err != nil {
-			return nil
+			return []string{}, fmt.Errorf("something went wrong determining the query type: %v", err)
 		}
 		queryType = resolvedType
 	case uint16:
-		queryType = v
+		queryType = qt
 	default:
-		return nil
+		return []string{}, nil // It isn't possible to get here, no reason to return anything
 	}
 
 	switch queryType {
 	case dns.TypeA:
-		return records.ARecords
+		return records.ARecords, nil
 	case dns.TypeAAAA:
-		return records.AAAARecords
+		return records.AAAARecords, nil
 	case dns.TypeCNAME:
-		return records.CNAMERecords
+		return records.CNAMERecords, nil
 	case dns.TypeMX:
 		hosts := []string{}
 		for _, mx := range records.MXRecords {
 			hosts = append(hosts, mx.Host)
 		}
-		return hosts
+		return hosts, nil
 	case dns.TypeTXT:
-		return records.TXTRecords
+		return records.TXTRecords, nil
 	case dns.TypeNS:
-		return records.NSRecords
+		return records.NSRecords, nil
 	default:
-		return nil
+		return []string{}, nil // It isn't possible to get here, no reason to return anything
 	}
 }
