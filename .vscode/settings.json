@@ -12,6 +12,7 @@
     "goarm",
     "goreleaser",
     "IDNS",
+    "invalidtype",
     "ldflags",
     "miekg",
     "qtype",

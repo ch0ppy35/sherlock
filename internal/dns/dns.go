@@ -150,7 +150,7 @@ func GetQueryTypeFromString(testType string) (uint16, error) {
 	case "ns":
 		return dns.TypeNS, nil
 	default:
-		return 0, fmt.Errorf("unsupported test type. Supported types: a, aaaa, cname, mx, txt, ns")
+		return 0, fmt.Errorf("unsupported test type, supported types: a, aaaa, cname, mx, txt, ns")
 	}
 }
 
@@ -166,8 +166,6 @@ func ExtractRecords[T uint16 | string](records *DNSRecords, qtype T) ([]string, 
 		queryType = resolvedType
 	case uint16:
 		queryType = qt
-	default:
-		return []string{}, nil // It isn't possible to get here, no reason to return anything
 	}
 
 	switch queryType {
@@ -187,7 +185,6 @@ func ExtractRecords[T uint16 | string](records *DNSRecords, qtype T) ([]string, 
 		return records.TXTRecords, nil
 	case dns.TypeNS:
 		return records.NSRecords, nil
-	default:
-		return []string{}, nil // It isn't possible to get here, no reason to return anything
 	}
+	return []string{}, nil
 }

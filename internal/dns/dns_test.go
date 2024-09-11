@@ -569,7 +569,7 @@ func TestExtractRecords(t *testing.T) {
 				qtype:   "invalidtype",
 			},
 			wantErr: true,
-			errMsg:  "something went wrong determining the query type: unsupported test type. Supported types: a, aaaa, cname, mx, txt, ns",
+			errMsg:  "something went wrong determining the query type: unsupported test type, supported types: a, aaaa, cname, mx, txt, ns",
 			want:    []string{},
 		},
 	}
