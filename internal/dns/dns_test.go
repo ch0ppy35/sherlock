@@ -579,10 +579,10 @@ func TestExtractRecords(t *testing.T) {
 			switch v := tt.args.(type) {
 			case args[uint16]:
 				got, err := ExtractRecords(v.records, v.qtype)
-				if (err != nil) != tt.wantErr { // Check if we expected an error
+				if (err != nil) != tt.wantErr {
 					t.Errorf("ExtractRecords() error = %v, wantErr %v", err, tt.wantErr)
 				}
-				if err != nil && err.Error() != tt.errMsg { // Check the error message if it exists
+				if err != nil && err.Error() != tt.errMsg {
 					t.Errorf("ExtractRecords() error message = %v, wantErrMessage %v", err.Error(), tt.errMsg)
 				}
 				if !reflect.DeepEqual(got, tt.want) {

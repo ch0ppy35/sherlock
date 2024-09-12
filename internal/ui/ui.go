@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/fatih/color"
 )
@@ -34,10 +36,18 @@ func PrintDashes() {
 }
 
 func PrintMsgWithStatus(status string, color string, format string, a ...any) {
+	printWithStatus(os.Stdout, status, color, format, a...)
+}
+
+func PrintErrMsgWithStatus(status string, color string, format string, a ...any) {
+	printWithStatus(os.Stderr, status, color, format, a...)
+}
+
+func printWithStatus(output io.Writer, status string, color string, format string, a ...any) {
 	writer, ok := DefaultColorWriters[color]
 	if !ok {
-		fmt.Printf("%s — %s", status, fmt.Sprintf(format, a...))
+		fmt.Fprintf(output, "%s — %s", status, fmt.Sprintf(format, a...))
 		return
 	}
-	fmt.Printf("%s — %s", writer(status), fmt.Sprintf(format, a...))
+	fmt.Fprintf(output, "%s — %s", writer(status), fmt.Sprintf(format, a...))
 }

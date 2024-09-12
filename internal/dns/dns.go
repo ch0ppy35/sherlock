@@ -22,7 +22,7 @@ type MXRecord struct {
 	Pref uint16
 }
 
-// Thinned down 'github.com/miekg/dns.client' implementation for easy testing
+// IDNSClient is a small 'github.com/miekg/dns.client' implementation for easy testing
 type IDNSClient interface {
 	Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error)
 }

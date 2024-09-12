@@ -33,13 +33,13 @@ Flags:
 	Run: func(cmd *cobra.Command, args []string) {
 		testType, expectedValues, dnsServer, host, err := parseFlags(cmd)
 		if err != nil {
-			ui.PrintMsgWithStatus("ERROR", "red", "Error: %v\n\n", err)
+			ui.PrintErrMsgWithStatus("ERROR", "red", "Error: %v\n\n", err)
 			cmd.Usage()
 			os.Exit(1)
 		}
 
 		if err := runDNSQueryAndCompare(testType, expectedValues, dnsServer, host); err != nil {
-			ui.PrintMsgWithStatus("FAIL", "red", "Test failed: %v\n", err)
+			ui.PrintErrMsgWithStatus("FAIL", "red", "Test failed: %v\n", err)
 			os.Exit(1)
 		} else {
 			ui.PrintMsgWithStatus("GOOD", "green", "Record matches!\n")

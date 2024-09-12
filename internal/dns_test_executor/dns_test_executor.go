@@ -100,7 +100,7 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 		}
 
 		if err := dns.CompareRecords(test.ExpectedValues, actualValues); err != nil {
-			ui.PrintMsgWithStatus("BAD", "red", "Records don't match the configuration\n")
+			ui.PrintErrMsgWithStatus("BAD", "red", "Records don't match the configuration\n")
 			e.AllErrors = append(e.AllErrors, fmt.Errorf("DNS check failed for host %s: %v", host, err))
 		} else {
 			ui.PrintMsgWithStatus("GOOD", "green", "All records match the configuration\n")

@@ -33,14 +33,14 @@ values and report any discrepancies after all tests are completed.`,
 func runTests() {
 	config, err := cfg.LoadDNSRecordsFullTestConfig(configFile)
 	if err != nil {
-		ui.PrintMsgWithStatus("ERROR", "hiRed", "Trouble loading the config: %v\n", err)
+		ui.PrintErrMsgWithStatus("ERROR", "hiRed", "Trouble loading the config: %v\n", err)
 		os.Exit(1)
 	}
 	client := new(dns.Client)
 	executor := dtexc.NewDNSTestExecutor(config, client)
 	err = executor.RunAllTests()
 	if err != nil {
-		ui.PrintMsgWithStatus("FAIL", "hiRed", "One or more tests failed, check above\n")
+		ui.PrintErrMsgWithStatus("FAIL", "hiRed", "One or more tests failed, check above\n")
 		os.Exit(1)
 	}
 }
