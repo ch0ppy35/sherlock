@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	awssts "github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/ch0ppy35/sherlock/internal/ui"
 	"github.com/ch0ppy35/sherlock/pkg/aws/sts"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -26,7 +25,7 @@ func getAWSProfile() string {
 }
 
 // renderWhoAmITable prints the AWS identity information in a table format
-func renderWhoAmITable(profile string, who *awssts.GetCallerIdentityOutput) {
+func renderWhoAmITable(profile string, who *sts.GetCallerIdentityOutput) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.SetStyle(table.StyleRounded)
@@ -47,7 +46,7 @@ func renderWhoAmITable(profile string, who *awssts.GetCallerIdentityOutput) {
 func WhoAmI(ctx context.Context, client sts.STSAPI) {
 	profile := getAWSProfile()
 
-	who, err := sts.GetCallerIdentity(ctx, client)
+	who, err := client.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {
 		ui.PrintErrMsgWithStatus("ERROR", "red", "%v", err)
 		os.Exit(1)

@@ -10,44 +10,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var getCallerIdentityTestOutput = &sts.GetCallerIdentityOutput{
+var getCallerIdentityTestOutputGood = &sts.GetCallerIdentityOutput{
 	Account: aws.String("123456789012"),
 	Arn:     aws.String("arn:aws:iam::123456789012:user/test-user"),
 	UserId:  aws.String("AID123EXAMPLE"),
 }
 
 func Test_getCallerIdentity(t *testing.T) {
-	type args struct {
-		ctx    context.Context
-		client STSAPI
-	}
 	tests := []struct {
 		name    string
-		args    args
+		ctx     context.Context
+		client  STSAPI
 		want    *sts.GetCallerIdentityOutput
 		wantErr bool
 	}{
 		{
 			name: "Successful call to GetCallerIdentity",
-			args: args{
-				ctx: context.Background(),
-				client: &MockSTSClient{
-					GetCallerIdentityFunc: func(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
-						return getCallerIdentityTestOutput, nil
-					},
+			ctx:  context.Background(),
+			client: &MockSTSClient{
+				GetCallerIdentityFunc: func(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
+					return getCallerIdentityTestOutputGood, nil
 				},
 			},
-			want:    getCallerIdentityTestOutput,
+			want:    getCallerIdentityTestOutputGood,
 			wantErr: false,
 		},
 		{
 			name: "Error in GetCallerIdentity",
-			args: args{
-				ctx: context.Background(),
-				client: &MockSTSClient{
-					GetCallerIdentityFunc: func(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
-						return nil, errors.New("Access Denied")
-					},
+			ctx:  context.Background(),
+			client: &MockSTSClient{
+				GetCallerIdentityFunc: func(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
+					return nil, errors.New("operation error STS: GetCallerIdentity, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, request canceled, context deadline exceededexit status 1")
 				},
 			},
 			want:    nil,
@@ -57,9 +50,9 @@ func Test_getCallerIdentity(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetCallerIdentity(tt.args.ctx, tt.args.client)
+			got, err := tt.client.GetCallerIdentity(tt.ctx, &sts.GetCallerIdentityInput{})
 			if (err != nil) != tt.wantErr {
-				t.Errorf("getCallerIdentity() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetCallerIdentity() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			assert.Equal(t, tt.want, got)
