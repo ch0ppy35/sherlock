@@ -16,6 +16,7 @@ type DNSTestExecutor struct {
 	Errors    map[string]error
 	AllErrors []error
 	mu        sync.Mutex
+	wg        sync.WaitGroup
 }
 
 func NewDNSTestExecutor(config cfg.DNSRecordsFullTestConfig, client dns.IDNSClient) *DNSTestExecutor {
@@ -29,16 +30,14 @@ func NewDNSTestExecutor(config cfg.DNSRecordsFullTestConfig, client dns.IDNSClie
 
 // RunAllTests executes all DNS tests defined in the configuration.
 func (e *DNSTestExecutor) RunAllTests() error {
-	var wg sync.WaitGroup
-
 	hostTests := e.groupTestsByHost()
 
 	ui.PrintMsgWithStatus("INFO", "magenta", "Using DNS server: %s\n", e.Config.DNSServer)
 	for host := range hostTests {
-		wg.Add(1)
-		go e.queryDNSForHost(host, &wg)
+		e.wg.Add(1)
+		go e.queryDNSForHost(host, &e.wg)
 	}
-	wg.Wait()
+	e.wg.Wait()
 
 	for host, tests := range hostTests {
 		e.runTestsForHost(host, tests)
