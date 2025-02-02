@@ -14,18 +14,19 @@ type STSClient struct {
 	Client *sts.Client
 }
 
+func GetCallerIdentity(ctx context.Context, client STSAPI) (*sts.GetCallerIdentityOutput, error) {
+	return client.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+}
+
 func (c *STSClient) GetCallerIdentity(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
 	return c.Client.GetCallerIdentity(ctx, input, optFns...)
 }
 
 // Mocks
 type MockSTSClient struct {
-	getCallerIdentityFunc func(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error)
+	GetCallerIdentityFunc func(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error)
 }
 
 func (m *MockSTSClient) GetCallerIdentity(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
-	return m.getCallerIdentityFunc(ctx, input, optFns...)
+	return m.GetCallerIdentityFunc(ctx, input, optFns...)
 }
-
-//
-//
