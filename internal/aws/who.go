@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ch0ppy35/sherlock/internal/ui"
 	"github.com/ch0ppy35/sherlock/pkg/aws/sts"
+	"github.com/ch0ppy35/sherlock/pkg/ui"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 )

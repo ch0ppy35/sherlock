@@ -5,7 +5,7 @@ import (
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
 	dtexc "github.com/ch0ppy35/sherlock/internal/dns_test_executor"
-	"github.com/ch0ppy35/sherlock/internal/ui"
+	"github.com/ch0ppy35/sherlock/pkg/ui"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )

@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
-	"github.com/ch0ppy35/sherlock/internal/dns"
-	"github.com/ch0ppy35/sherlock/internal/ui"
+	"github.com/ch0ppy35/sherlock/pkg/dns"
+	"github.com/ch0ppy35/sherlock/pkg/ui"
 )
 
 type DNSTestExecutor struct {
@@ -99,7 +99,7 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 			fmt.Printf("No records found for test type: %s on host: %s\n", test.TestType, host)
 		}
 
-		if err := dns.CompareRecords(test.ExpectedValues, actualValues); err != nil {
+		if err := CompareRecords(test.ExpectedValues, actualValues); err != nil {
 			ui.PrintErrMsgWithStatus("BAD", "red", "Records don't match the configuration\n")
 			e.AllErrors = append(e.AllErrors, fmt.Errorf("DNS check failed for host %s: %v", host, err))
 		} else {
