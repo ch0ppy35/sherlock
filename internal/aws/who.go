@@ -15,7 +15,8 @@ import (
 func getAWSProfile() string {
 	profile, exists := os.LookupEnv("AWS_PROFILE")
 	if !exists {
-		fmt.Fprintf(os.Stdout,
+		fmt.Fprintf(
+			os.Stdout,
 			"%s",
 			ui.DefaultColorWriters["magenta"]("AWS_PROFILE is not set, default profile in use\n"),
 		)
