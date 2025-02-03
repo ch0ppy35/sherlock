@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
-	"github.com/ch0ppy35/sherlock/internal/dns"
+	"github.com/ch0ppy35/sherlock/pkg/dns"
 	d "github.com/miekg/dns"
 )
 

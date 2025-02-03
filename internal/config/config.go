@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/ch0ppy35/sherlock/internal/ui"
+	"github.com/ch0ppy35/sherlock/pkg/ui"
 	"github.com/spf13/viper"
 )
 

@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ch0ppy35/sherlock/internal/dns"
-	"github.com/ch0ppy35/sherlock/internal/ui"
+	"github.com/ch0ppy35/sherlock/internal/dns_test_executor"
+	"github.com/ch0ppy35/sherlock/pkg/dns"
+	"github.com/ch0ppy35/sherlock/pkg/ui"
 	d "github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
@@ -68,7 +69,7 @@ func runDNSQueryAndCompare(testType string, expectedValues []string, dnsServer, 
 		return fmt.Errorf("error querying DNS: %v", err)
 	}
 
-	if err := dns.CompareRecords(expectedValues, actualValues); err != nil {
+	if err := dns_test_executor.CompareRecords(expectedValues, actualValues); err != nil {
 		return fmt.Errorf("DNS comparison failed: %v", err)
 	}
 

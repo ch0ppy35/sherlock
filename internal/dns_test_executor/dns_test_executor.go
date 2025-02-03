@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
-	"github.com/ch0ppy35/sherlock/internal/dns"
-	"github.com/ch0ppy35/sherlock/internal/ui"
+	"github.com/ch0ppy35/sherlock/pkg/dns"
+	"github.com/ch0ppy35/sherlock/pkg/ui"
 )
 
 type DNSTestExecutor struct {
@@ -16,6 +16,7 @@ type DNSTestExecutor struct {
 	Errors    map[string]error
 	AllErrors []error
 	mu        sync.Mutex
+	wg        sync.WaitGroup
 }
 
 func NewDNSTestExecutor(config cfg.DNSRecordsFullTestConfig, client dns.IDNSClient) *DNSTestExecutor {
@@ -29,16 +30,14 @@ func NewDNSTestExecutor(config cfg.DNSRecordsFullTestConfig, client dns.IDNSClie
 
 // RunAllTests executes all DNS tests defined in the configuration.
 func (e *DNSTestExecutor) RunAllTests() error {
-	var wg sync.WaitGroup
-
 	hostTests := e.groupTestsByHost()
 
 	ui.PrintMsgWithStatus("INFO", "magenta", "Using DNS server: %s\n", e.Config.DNSServer)
 	for host := range hostTests {
-		wg.Add(1)
-		go e.queryDNSForHost(host, &wg)
+		e.wg.Add(1)
+		go e.queryDNSForHost(host, &e.wg)
 	}
-	wg.Wait()
+	e.wg.Wait()
 
 	for host, tests := range hostTests {
 		e.runTestsForHost(host, tests)
@@ -99,7 +98,7 @@ func (e *DNSTestExecutor) runTestsForHost(host string, tests []cfg.DNSTestConfig
 			fmt.Printf("No records found for test type: %s on host: %s\n", test.TestType, host)
 		}
 
-		if err := dns.CompareRecords(test.ExpectedValues, actualValues); err != nil {
+		if err := CompareRecords(test.ExpectedValues, actualValues); err != nil {
 			ui.PrintErrMsgWithStatus("BAD", "red", "Records don't match the configuration\n")
 			e.AllErrors = append(e.AllErrors, fmt.Errorf("DNS check failed for host %s: %v", host, err))
 		} else {
