@@ -22,6 +22,10 @@ type MXRecord struct {
 	Pref uint16
 }
 
+func NewClient() *dns.Client {
+	return new(dns.Client)
+}
+
 // IDNSClient is a small 'github.com/miekg/dns.client' implementation for easy testing
 type IDNSClient interface {
 	Exchange(msg *dns.Msg, server string) (*dns.Msg, time.Duration, error)

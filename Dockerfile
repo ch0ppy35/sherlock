@@ -6,6 +6,7 @@ RUN go mod download
 COPY main.go main.go
 COPY cmd/ cmd/
 COPY internal/ internal/
+copy pkg/ pkg/
 
 RUN BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') && \
     BUILD_ARCH=$(go env GOARCH) && \

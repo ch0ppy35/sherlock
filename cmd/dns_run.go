@@ -5,8 +5,8 @@ import (
 
 	cfg "github.com/ch0ppy35/sherlock/internal/config"
 	dtexc "github.com/ch0ppy35/sherlock/internal/dns_test_executor"
+	"github.com/ch0ppy35/sherlock/pkg/dns"
 	"github.com/ch0ppy35/sherlock/pkg/ui"
-	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ func runTests() {
 		ui.PrintErrMsgWithStatus("ERROR", "hiRed", "Trouble loading the config: %v\n", err)
 		os.Exit(1)
 	}
-	client := new(dns.Client)
+	client := dns.NewClient()
 	executor := dtexc.NewDNSTestExecutor(config, client)
 	err = executor.RunAllTests()
 	if err != nil {

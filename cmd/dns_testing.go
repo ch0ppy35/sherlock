@@ -7,7 +7,6 @@ import (
 	"github.com/ch0ppy35/sherlock/internal/dns_test_executor"
 	"github.com/ch0ppy35/sherlock/pkg/dns"
 	"github.com/ch0ppy35/sherlock/pkg/ui"
-	d "github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
 
@@ -62,7 +61,7 @@ func parseFlags(cmd *cobra.Command) (string, []string, string, string, error) {
 }
 
 func runDNSQueryAndCompare(testType string, expectedValues []string, dnsServer, domain string) error {
-	client := new(d.Client)
+	client := dns.NewClient()
 
 	actualValues, err := dns.QueryAndExtract(client, testType, dnsServer, domain)
 	if err != nil {
