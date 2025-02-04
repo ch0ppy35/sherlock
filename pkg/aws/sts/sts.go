@@ -21,10 +21,6 @@ type STSClient struct {
 	Client *sts.Client
 }
 
-func (c *STSClient) GetCallerIdentity(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
-	return c.Client.GetCallerIdentity(ctx, input, optFns...)
-}
-
 func ClientConnect() (context.Context, *STSClient) {
 	ctx := context.Background()
 	cfg, err := config.LoadDefaultConfig(ctx)
@@ -34,6 +30,10 @@ func ClientConnect() (context.Context, *STSClient) {
 	}
 
 	return ctx, &STSClient{Client: sts.NewFromConfig(cfg)}
+}
+
+func (c *STSClient) GetCallerIdentity(ctx context.Context, input *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
+	return c.Client.GetCallerIdentity(ctx, input, optFns...)
 }
 
 // STS Client Mocks
